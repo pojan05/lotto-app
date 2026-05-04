@@ -92,6 +92,71 @@ function parseCSVLine(line: string): string[] {
   return result
 }
 
+export const LOTTO_NAMES: Record<string, string> = {
+  'GLO': '🇹🇭 หวยรัฐบาลไทย',
+  'BAAC': '🌾 ธ.ก.ส.',
+  'GSB': '🏦 ออมสิน',
+  'SET': '📈 หุ้นไทย (SET)',
+  'KTOP30': '📊 หุ้นไทย K-Top30',
+  'KTOPVIP': '📊 หุ้นไทย K-Top VIP',
+  'DAX': '🇩🇪 หุ้นเยอรมัน (DAX)',
+  'DJI': '🇺🇸 ดาวโจนส์ (DJI)',
+  'DJIVIP': '🇺🇸 ดาวโจนส์ VIP',
+  'BSE': '🇮🇳 หุ้นอินเดีย (BSE)',
+  'EGX30': '🇪🇬 หุ้นอียิปต์ (EGX30)',
+  'HSI_1': '🇭🇰 ฮั่งเส็ง รอบ 1',
+  'HSI_2': '🇭🇰 ฮั่งเส็ง รอบ 2',
+  'HSIVIP_1': '🇭🇰 ฮั่งเส็ง VIP รอบ 1',
+  'HSIVIP_2': '🇭🇰 ฮั่งเส็ง VIP รอบ 2',
+  'NKY_1': '🇯🇵 นิเคอิ รอบ 1',
+  'NKY_2': '🇯🇵 นิเคอิ รอบ 2',
+  'NKYVIP_1': '🇯🇵 นิเคอิ VIP รอบ 1',
+  'NKYVIP_2': '🇯🇵 นิเคอิ VIP รอบ 2',
+  'STI': '🇸🇬 หุ้นสิงคโปร์ (STI)',
+  'STIVIP': '🇸🇬 หุ้นสิงคโปร์ VIP',
+  'SZSE_1': '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 1',
+  'SZSE_2': '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 2',
+  'SZSEVIP_1': '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 1',
+  'SZSEVIP_2': '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 2',
+  'TAIEX': '🇹🇼 หุ้นไต้หวัน (TAIEX)',
+  'TAIEXCIP': '🇹🇼 หุ้นไต้หวัน CIP',
+  'UKX': '🇬🇧 หุ้นอังกฤษ (FTSE)',
+  'UKXVIP': '🇬🇧 หุ้นอังกฤษ VIP',
+  'MOEX': '🇷🇺 หุ้นรัสเซีย (MOEX)',
+  'LOEX': '🌍 หุ้น LOEX',
+  'LATV': '🇱🇦 หวยลาว TV',
+  'LAVIP': '🇱🇦 หวยลาว VIP',
+  'LAHD': '🇱🇦 หวยลาว HD',
+  'LASMK': '🇱🇦 หวยลาว SMK',
+  'LASTR': '🇱🇦 หวยลาว Star',
+  'LASTRVIP': '🇱🇦 หวยลาว Star VIP',
+  'LATK5D': '🇱🇦 หวยลาว TK 5D',
+  'LATKVIP': '🇱🇦 หวยลาว TK VIP',
+  'LALOT': '🇱🇦 หวยลาว Lot',
+  'Laaoo': '🇱🇦 หวยลาว',
+  'VNLOT': '🇻🇳 หวยเวียดนาม Lot',
+  'VNSTR': '🇻🇳 หวยเวียดนาม Star',
+  'VNTV': '🇻🇳 หวยเวียดนาม TV',
+  'VNVIP': '🇻🇳 หวยเวียดนาม VIP',
+  'VNAS': '🇻🇳 หวยเวียดนาม AS',
+  'VNEXT': '🇻🇳 หวยเวียดนาม EXT',
+  'VNHD': '🇻🇳 หวยเวียดนาม HD',
+  'VNKCH': '🇻🇳 หวยเวียดนาม KCH',
+  'VNPTN': '🇻🇳 หวยเวียดนาม PTN',
+  'VNSPC_2': '🇻🇳 หวยเวียดนาม SPC รอบ 2',
+  'VNSPCb': '🇻🇳 หวยเวียดนาม SPC B',
+  'GRAND_DRAGON_4D': '🐉 Grand Dragon 4D',
+  'MAGNUM': '🇲🇾 หวยมาเลย์ Magnum',
+  'MAGNUM_4D': '🇲🇾 หวยมาเลย์ Magnum 4D',
+  'SINGAPORE_4D': '🇸🇬 หวยสิงคโปร์ 4D',
+}
+
+export function getLottoName(code: string): string {
+  if (LOTTO_NAMES[code]) return LOTTO_NAMES[code]
+  if (code.startsWith('LV_R')) return `🎰 หวยหุ้น รอบ ${code.replace('LV_R', '')}`
+  return code
+}
+
 export function getStats(rows: ParsedResult[]) {
   const bot2Counts: Record<string, number> = {}
   const top3Counts: Record<string, number> = {}
