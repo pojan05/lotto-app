@@ -2,20 +2,17 @@ import Head from 'next/head'
 import { useEffect, useMemo, useState } from 'react'
 import {
   analyzeNumber,
-  getAdvancedAnalytics,
   getLottoName,
   getQuickBacktest,
   getStats,
   parseCSV,
-  type AdvancedPick,
   type NumberAnalysis,
   type ParsedResult,
-  type StrategyBacktest,
 } from '../lib/parseCSV'
 import { useMockBet, type BetType, type MockBet } from '../hooks/useMockBet'
 import styles from './index.module.css'
 
-type Tab = 'overview' | 'analyze' | 'heatmap' | 'backtest' | 'ai' | 'hot' | 'cold' | 'history' | 'mybets'
+type Tab = 'overview' | 'analyze' | 'hot' | 'cold' | 'history' | 'mybets'
 
 export default function Home() {
   const [rows, setRows] = useState<ParsedResult[]>([])
@@ -48,8 +45,7 @@ export default function Home() {
 
   const stats = useMemo(() => getStats(filtered), [filtered])
   const backtest = useMemo(() => getQuickBacktest(filtered), [filtered])
-  // heavy calc — only when user actually opens those tabs
-  const advanced = useMemo(() => tab === 'overview' || tab === 'heatmap' || tab === 'ai' || tab === 'backtest' ? getAdvancedAnalytics(filtered) : null, [filtered, tab])
+  // โหมด Lite: ไม่คำนวณ Advanced / Monte Carlo ตอนเปิดหน้า เพื่อให้มือถือไม่หน่วง
 
   useEffect(() => {
     if (!query && stats.candidates2[0]) setQuery(stats.candidates2[0].number)
@@ -149,9 +145,6 @@ export default function Home() {
           {([
             { id: 'overview', label: 'ภาพรวม', icon: '✨' },
             { id: 'analyze', label: 'วิเคราะห์', icon: '🔎' },
-            { id: 'heatmap', label: 'Heatmap', icon: '🧊' },
-            { id: 'backtest', label: 'Backtest', icon: '📈' },
-            { id: 'ai', label: 'AI', icon: '🤖' },
             { id: 'hot', label: 'เลขเด่น', icon: '🔥' },
             { id: 'cold', label: 'เลขอั้น', icon: '❄️' },
             { id: 'history', label: 'ประวัติ', icon: '🕘' },
@@ -167,21 +160,30 @@ export default function Home() {
         </nav>
 
         {/* Tab: Overview */}
-        {tab === 'overview' && advanced && (
+        {tab === 'overview' && (
           <div className={styles.stack}>
             <section className={styles.panel}>
               <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>เลขคัดกรอง</div>
+                <div className={styles.sectionKicker}>เลขคัดกรองเบื้องต้น</div>
               </div>
               <div className={styles.candidateGrid}>
-                {advanced.picks.slice(0, 6).map(item => (
-                  <AdvancedPickCard key={item.number} item={item} onClick={() => { setQuery(item.number); setTab('analyze') }} />
+                {stats.candidates2.slice(0, 6).map(item => (
+                  <button key={item.number} className={styles.candidateCard} onClick={() => { setQuery(item.number); setTab('analyze') }}>
+                    <div className={styles.candidateTop}>
+                      <span className={styles.candidateNum}>{item.number}</span>
+                      <span className={styles.scoreBadge}>คะแนน {item.score}/10</span>
+                    </div>
+                    <div className={styles.candidateMeta}>ออกทั้งหมด {item.frequencyAll} ครั้ง • หาย {item.gap} งวด</div>
+                    <div className={styles.candidateLevel}>
+                      {item.reasons.slice(0, 3).map(reason => <span key={reason}>{reason}</span>)}
+                    </div>
+                  </button>
                 ))}
               </div>
             </section>
             <section className={styles.panel}>
               <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>Backtest (3 เลข/งวด x 5 บาท)</div>
+                <div className={styles.sectionKicker}>Backtest แบบเร็ว (3 เลข/งวด x 5 บาท)</div>
               </div>
               <div className={styles.backtestGrid}>
                 <BacktestItem label="งวดที่ทดสอบ" value={`${backtest.rounds}`} />
@@ -260,74 +262,6 @@ export default function Home() {
                     <div className={styles.coldGap}>{item.gap > filtered.length + 10 ? 'ไม่เคยออก' : `หาย ${item.gap} งวด`}</div>
                   </button>
                 ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* Tab: Heatmap */}
-        {tab === 'heatmap' && advanced && (
-          <div className={styles.stack}>
-            <section className={styles.panel}>
-              <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>Heatmap 00–99 (Hybrid Score)</div>
-              </div>
-              <div className={styles.heatmapGrid}>
-                {advanced.heatmap.map(item => (
-                  <button key={item.number} className={styles.heatCell}
-                    style={{ opacity: 0.42 + item.score / 16 }}
-                    onClick={() => { setQuery(item.number); setTab('analyze') }}>
-                    <span>{item.number}</span>
-                    <small>{item.score}</small>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* Tab: Backtest */}
-        {tab === 'backtest' && advanced && (
-          <div className={styles.stack}>
-            <section className={styles.panel}>
-              <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>เปรียบเทียบสูตร (3 เลข/งวด x 5 บาท จ่าย 90)</div>
-              </div>
-              <div className={styles.strategyList}>
-                {advanced.strategyBacktests.map(item => <StrategyCard key={item.label} item={item} />)}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* Tab: AI */}
-        {tab === 'ai' && advanced && (
-          <div className={styles.stack}>
-            <section className={styles.panel}>
-              <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>AI Insight</div>
-              </div>
-              <div className={styles.insightList}>
-                {advanced.aiInsights.map((text, i) => (
-                  <div key={i} className={styles.insightCard}>
-                    <div className={styles.insightIcon}>{i + 1}</div>
-                    <p>{text}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-            <section className={styles.panel}>
-              <div className={styles.cardHead}>
-                <div className={styles.sectionKicker}>Markov — หลังเลข {advanced.markovSource} มักตามด้วย</div>
-              </div>
-              <div className={styles.markovList}>
-                {advanced.markovTop.length > 0 ? advanced.markovTop.map(item => (
-                  <div key={item.number} className={styles.markovRow}>
-                    <span className={styles.markovNum}>{item.number}</span>
-                    <div className={styles.markovTrack}><div style={{ width: `${Math.min(item.probability, 100)}%` }} /></div>
-                    <span className={styles.markovProb}>{item.probability}%</span>
-                  </div>
-                )) : <div className={styles.empty}>ข้อมูลยังไม่พอสำหรับ Markov</div>}
               </div>
             </section>
           </div>
@@ -437,38 +371,6 @@ function BacktestItem({ label, value, accent }: { label: string; value: string; 
       <div className={`${styles.backtestValue} ${accent ? styles.backtestValuePositive : ''}`}>{value}</div>
     </div>
   )
-}
-
-function AdvancedPickCard({ item, onClick }: { item: AdvancedPick; onClick: () => void }) {
-  return (
-    <button className={styles.candidateCard} onClick={onClick}>
-      <div className={styles.candidateTop}>
-        <span className={styles.candidateNum}>{item.number}</span>
-        <span className={styles.scoreBadge}>{item.score}/10</span>
-      </div>
-      <div className={styles.candidateLevel}>Confidence {item.confidence}% • Risk {riskThai(item.risk)}</div>
-      <div className={styles.candidateMeta}>Gap {item.gap} งวด • Markov {item.markovScore}/10 • MC {item.monteCarloScore}/10</div>
-    </button>
-  )
-}
-
-function StrategyCard({ item }: { item: StrategyBacktest }) {
-  return (
-    <div className={styles.strategyCard}>
-      <div>
-        <div className={styles.strategyName}>{item.label}</div>
-        <div className={styles.strategySub}>{item.wins}/{item.rounds} งวด • Hit rate {item.hitRate}%</div>
-      </div>
-      <div className={styles.strategyMetrics}>
-        <span className={item.profit >= 0 ? styles.profitGood : styles.profitBad}>{item.profit > 0 ? '+' : ''}{item.profit}</span>
-        <small>ROI {item.roi}%</small>
-      </div>
-    </div>
-  )
-}
-
-function riskThai(risk: AdvancedPick['risk']) {
-  return risk === 'low' ? 'ต่ำ' : risk === 'high' ? 'สูง' : 'กลาง'
 }
 
 function AnalysisCard({ analysis }: { analysis: NumberAnalysis }) {
