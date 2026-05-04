@@ -1,32 +1,35 @@
 import Head from 'next/head'
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  parseCSV,
-  getStats,
-  getLottoName,
   analyzeNumber,
-  runBacktest,
-  type ParsedResult,
+  getAdvancedAnalytics,
+  getLottoName,
+  getQuickBacktest,
+  getStats,
+  parseCSV,
+  type AdvancedPick,
   type NumberAnalysis,
+  type ParsedResult,
+  type StrategyBacktest,
 } from '../lib/parseCSV'
 import styles from './index.module.css'
 
-type Tab = 'analyze' | 'hot' | 'cold' | 'tod' | 'backtest' | 'history'
+type Tab = 'overview' | 'analyze' | 'heatmap' | 'backtest' | 'ai' | 'hot' | 'cold' | 'history'
 
 export default function Home() {
   const [rows, setRows] = useState<ParsedResult[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selectedType, setSelectedType] = useState('')
-  const [tab, setTab] = useState<Tab>('analyze')
+  const [tab, setTab] = useState<Tab>('overview')
   const [showTypeMenu, setShowTypeMenu] = useState(false)
-  const [numberInput, setNumberInput] = useState('')
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     fetch('/api/lotto')
-      .then(r => {
-        if (!r.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ')
-        return r.text()
+      .then(async response => {
+        if (!response.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ')
+        return response.text()
       })
       .then(text => {
         const parsed = parseCSV(text)
@@ -35,8 +38,8 @@ export default function Home() {
         if (types.length > 0) setSelectedType(types[0])
         setLoading(false)
       })
-      .catch(e => {
-        setError(e.message)
+      .catch(err => {
+        setError(err.message || 'เกิดข้อผิดพลาด')
         setLoading(false)
       })
   }, [])
@@ -45,19 +48,22 @@ export default function Home() {
 
   const filtered = useMemo(() => {
     return rows
-      .filter(r => r.lottoType === selectedType && (r.bot2 || r.top3))
-      .sort((a, b) => (b.date > a.date ? 1 : -1))
+      .filter(r => r.lottoType === selectedType)
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
   }, [rows, selectedType])
 
   const stats = useMemo(() => getStats(filtered), [filtered])
+  const advanced = useMemo(() => getAdvancedAnalytics(filtered), [filtered])
+  const backtest = useMemo(() => getQuickBacktest(filtered), [filtered])
 
-  const maxBot2Count = useMemo(() => Math.max(...Object.values(stats.bot2Counts), 1), [stats.bot2Counts])
+  useEffect(() => {
+    if (!query && stats.candidates2[0]) {
+      setQuery(stats.candidates2[0].number)
+    }
+  }, [stats.candidates2, query])
 
-  const analysis: NumberAnalysis | null = useMemo(() => {
-    return numberInput ? analyzeNumber(filtered, numberInput) : null
-  }, [filtered, numberInput])
-
-  const backtest = useMemo(() => runBacktest(filtered, 30, 3, 5, 90), [filtered])
+  const analysis = useMemo(() => analyzeNumber(filtered, query), [filtered, query])
+  const latest = filtered[0]
 
   if (loading) return <LoadingScreen />
   if (error) return <ErrorScreen msg={error} />
@@ -65,31 +71,41 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>🛸 Alieninburi Lotto</title>
+        <title>Alieninburi Lotto • Smart Cute Analytics</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="description" content="ระบบวิเคราะห์สถิติหวย Alieninburi" />
+        <meta
+          name="description"
+          content="วิเคราะห์สถิติหวยด้วยหน้าตาทันสมัย อ่านง่าย ตัวเลขชัด พร้อมระบบวิเคราะห์เลขและคัดกรองเลขเด่น"
+        />
       </Head>
 
-      <div className={styles.root}>
-        <div className={styles.bgOrbA} />
-        <div className={styles.bgOrbB} />
-
-        <header className={styles.header}>
-          <div className={styles.headerInner}>
-            <div className={styles.logo}>
-              <span className={styles.logoIcon}>🛸</span>
+      <div className={styles.pageGlow} />
+      <main className={styles.root}>
+        <header className={styles.heroCard}>
+          <div className={styles.heroTopRow}>
+            <div className={styles.brandWrap}>
+              <div className={styles.brandIcon}>🛸</div>
               <div>
-                <div className={styles.logoTitle}>ALIENINBURI</div>
-                <div className={styles.logoSub}>Cute Lotto Lab</div>
+                <div className={styles.brandEyebrow}>Alieninburi Lotto</div>
+                <h1 className={styles.brandTitle}>Cute Smart Analytics</h1>
               </div>
             </div>
-            <div className={styles.totalBadge}>{filtered.length} งวด</div>
+            <div className={styles.roundBadge}>{filtered.length} งวด</div>
           </div>
 
-          <div className={styles.typeSelector} onClick={() => setShowTypeMenu(true)}>
-            <span className={styles.typeLabel}>ตลาด</span>
-            <span className={styles.typeValue}>{selectedType ? getLottoName(selectedType) : 'เลือกประเภท'}</span>
-            <span className={styles.typeArrow}>▾</span>
+          <div className={styles.heroContent}>
+            <div>
+              <div className={styles.heroHeading}>วิเคราะห์เลขให้อ่านง่าย ตัวเลขเด่นชัด หน้าตาทันสมัย</div>
+              <p className={styles.heroText}>
+                เลือกประเภทหวย ดูผลล่าสุด ดูเลขร้อน เลขอั้น และใส่เลขเพื่อเช็กคะแนนจากข้อมูลย้อนหลังได้ทันที
+              </p>
+            </div>
+
+            <button className={styles.typeSelector} onClick={() => setShowTypeMenu(true)}>
+              <span className={styles.typeLabel}>ประเภทหวย</span>
+              <span className={styles.typeValue}>{selectedType ? getLottoName(selectedType) : 'เลือกประเภทหวย'}</span>
+              <span className={styles.typeArrow}>▾</span>
+            </button>
           </div>
         </header>
 
@@ -97,264 +113,443 @@ export default function Home() {
           <div className={styles.overlay} onClick={() => setShowTypeMenu(false)}>
             <div className={styles.bottomSheet} onClick={e => e.stopPropagation()}>
               <div className={styles.sheetHandle} />
-              <div className={styles.sheetTitle}>เลือกตลาด/ประเภทหวย</div>
+              <div className={styles.sheetTitle}>เลือกประเภทหวย</div>
               <div className={styles.typeList}>
-                {lottoTypes.map(t => (
-                  <div
-                    key={t}
-                    className={`${styles.typeItem} ${t === selectedType ? styles.typeItemActive : ''}`}
-                    onClick={() => { setSelectedType(t); setShowTypeMenu(false) }}
+                {lottoTypes.map(type => (
+                  <button
+                    key={type}
+                    className={`${styles.typeItem} ${type === selectedType ? styles.typeItemActive : ''}`}
+                    onClick={() => {
+                      setSelectedType(type)
+                      setShowTypeMenu(false)
+                    }}
                   >
-                    <span>{getLottoName(t)}</span>
-                    {t === selectedType && <span className={styles.checkmark}>✓</span>}
-                  </div>
+                    <span>{getLottoName(type)}</span>
+                    {type === selectedType && <span className={styles.checkmark}>✓</span>}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
         )}
 
-        <main className={styles.main}>
-          <section className={styles.heroCard}>
-            <div className={styles.heroKicker}>AI-assisted statistics • ไม่ใช่เลขล็อก</div>
-            <h1 className={styles.heroTitle}>ใส่เลขแล้วให้ระบบช่วยคัด</h1>
-            <p className={styles.heroText}>ดูความถี่ ระยะขาด เลขเพิ่งออก คะแนนความเสี่ยง และทดสอบสูตรย้อนหลัง ก่อนตัดสินใจใช้เงินจริง</p>
-            <div className={styles.analyzeBox}>
-              <input
-                className={styles.numberInput}
-                value={numberInput}
-                onChange={e => setNumberInput(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                placeholder="ใส่เลข 2 หรือ 3 ตัว เช่น 16 / 616"
-              />
-              <button className={styles.clearButton} onClick={() => setNumberInput('')}>ล้าง</button>
+        <section className={styles.latestCard}>
+          <div className={styles.cardHead}>
+            <div>
+              <div className={styles.sectionKicker}>ผลล่าสุด</div>
+              <h2 className={styles.sectionTitle}>ตัวเลขล่าสุดใหญ่ ชัด สะอาดตา</h2>
             </div>
-          </section>
-
-          <div className={styles.summaryGrid}>
-            <SummaryCard label="2 ตัวล่างเด่นสุด" value={stats.recommendations[0]?.num || '-'} sub={`${stats.recommendations[0]?.score || 0}/10 คะแนน`} color="accent" />
-            <SummaryCard label="สูตรย้อนหลัง" value={`${backtest.hitRate}%`} sub={`${backtest.hits}/${backtest.rounds} งวดเข้าเป้า`} color="cyan" />
+            <div className={styles.datePill}>{formatDate(latest?.date || '')}</div>
           </div>
 
-          {analysis && <AnalysisCard analysis={analysis} />}
-          {!analysis && <TopPicks recommendations={stats.recommendations.slice(0, 5)} />}
-
-          {filtered[0] && (
-            <div className={styles.latestCard}>
-              <div className={styles.latestDate}>งวดล่าสุด: {filtered[0].date}</div>
-              <div className={styles.latestNumbers}>
-                <div className={styles.numBox}>
-                  <div className={styles.numLabel}>3 ตัวบน</div>
-                  <div className={styles.numValue3}>{filtered[0].top3 || '---'}</div>
-                </div>
-                <div className={styles.numDivider} />
-                <div className={styles.numBox}>
-                  <div className={styles.numLabel}>2 ตัวล่าง</div>
-                  <div className={styles.numValue2}>{filtered[0].bot2 || '--'}</div>
-                </div>
-                {filtered[0].top4 && (
-                  <>
-                    <div className={styles.numDivider} />
-                    <div className={styles.numBox}>
-                      <div className={styles.numLabel}>4 ตัวบน</div>
-                      <div className={styles.numValue4}>{filtered[0].top4}</div>
-                    </div>
-                  </>
-                )}
-              </div>
+          {latest ? (
+            <div className={styles.latestNumbers}>
+              <NumberBubble label="3 ตัวบน" value={latest.top3 || '---'} kind="gold" />
+              <NumberBubble label="2 ตัวล่าง" value={latest.bot2 || '--'} kind="pink" />
+              <NumberBubble label="4 ตัวบน" value={latest.top4 || '----'} kind="blue" />
             </div>
+          ) : (
+            <div className={styles.empty}>ยังไม่มีข้อมูลของประเภทนี้</div>
           )}
+        </section>
 
-          <div className={styles.tabs}>
-            {[
-              { id: 'analyze' as Tab, label: '💖 วิเคราะห์' },
-              { id: 'hot' as Tab, label: '🔥 ร้อน' },
-              { id: 'cold' as Tab, label: '❄️ เย็น' },
-              { id: 'tod' as Tab, label: '🎲 โต๊ด' },
-              { id: 'backtest' as Tab, label: '🧪 Backtest' },
-              { id: 'history' as Tab, label: '📋 ประวัติ' },
-            ].map(t => (
-              <button key={t.id} className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`} onClick={() => setTab(t.id)}>
-                {t.label}
-              </button>
-            ))}
+        <section className={styles.miniGrid}>
+          <MiniStat
+            title="เลข 2 ตัวที่ออกบ่อยสุด"
+            value={stats.sortedBot2[0]?.[0] || '--'}
+            sub={`${stats.sortedBot2[0]?.[1] || 0} ครั้ง`}
+            emoji="🔥"
+          />
+          <MiniStat
+            title="เลขอั้นอันดับ 1"
+            value={stats.cold[0]?.num || '--'}
+            sub={stats.cold[0] ? `หาย ${stats.cold[0].gap} งวด` : '-'}
+            emoji="❄️"
+          />
+          <MiniStat
+            title="เลขคัดกรองเด่น"
+            value={stats.candidates2[0]?.number || '--'}
+            sub={stats.candidates2[0] ? `${stats.candidates2[0].score}/10` : '-'}
+            emoji="🎯"
+          />
+          <MiniStat
+            title="Monte Carlo"
+            value={`${advanced.monteCarloRuns.toLocaleString()}`}
+            sub="จำลองรอบ"
+            emoji="🎲"
+          />
+        </section>
+
+        <nav className={styles.tabs}>
+          {[
+            { id: 'overview' as Tab, label: 'ภาพรวม', icon: '✨' },
+            { id: 'analyze' as Tab, label: 'วิเคราะห์เลข', icon: '🔎' },
+            { id: 'heatmap' as Tab, label: 'Heatmap', icon: '🧊' },
+            { id: 'backtest' as Tab, label: 'Backtest', icon: '📈' },
+            { id: 'ai' as Tab, label: 'AI Insight', icon: '🤖' },
+            { id: 'hot' as Tab, label: 'เลขเด่น', icon: '🔥' },
+            { id: 'cold' as Tab, label: 'เลขอั้น', icon: '❄️' },
+            { id: 'history' as Tab, label: 'ประวัติ', icon: '🕘' },
+          ].map(item => (
+            <button
+              key={item.id}
+              className={`${styles.tab} ${tab === item.id ? styles.tabActive : ''}`}
+              onClick={() => setTab(item.id)}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {tab === 'overview' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>เลขคัดกรอง</div>
+                  <h2 className={styles.sectionTitle}>เลขน่าจับตาจากข้อมูลย้อนหลัง</h2>
+                </div>
+              </div>
+              <div className={styles.candidateGrid}>
+                {advanced.picks.slice(0, 6).map(item => (
+                  <AdvancedPickCard
+                    key={item.number}
+                    item={item}
+                    onClick={() => {
+                      setQuery(item.number)
+                      setTab('analyze')
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>Backtest</div>
+                  <h2 className={styles.sectionTitle}>ลองจำลองสูตรเลขเด่นแบบง่าย</h2>
+                </div>
+              </div>
+              <div className={styles.backtestGrid}>
+                <BacktestItem label="งวดที่ทดสอบ" value={`${backtest.rounds}`} />
+                <BacktestItem label="ชนะ" value={`${backtest.wins}`} />
+                <BacktestItem label="Hit rate" value={`${backtest.hitRate}%`} />
+                <BacktestItem label="กำไรสุทธิ" value={`${backtest.profit}`} accent={backtest.profit >= 0} />
+              </div>
+              <p className={styles.caption}>
+                ทดสอบจากสูตรเลือก 3 เลขคะแนนสูงสุดในแต่ละงวด งวดละ 5 บาท/เลข เพื่อดูแนวโน้มของสูตรเบื้องต้น
+              </p>
+            </section>
           </div>
+        )}
 
-          <div className={styles.tabContent}>
-            {tab === 'analyze' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>เลขที่ระบบคัดจากคะแนนรวม</div>
-                <div className={styles.pickGrid}>
-                  {stats.recommendations.slice(0, 12).map((p, i) => (
-                    <button key={p.num} className={styles.pickCard} onClick={() => setNumberInput(p.num)}>
-                      <div className={styles.pickRank}>#{i + 1}</div>
-                      <div className={styles.pickNum}>{p.num}</div>
-                      <div className={styles.pickScore}>{p.score}/10</div>
-                      <div className={styles.pickReason}>{p.reason}</div>
+        {tab === 'analyze' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>วิเคราะห์เลข</div>
+                  <h2 className={styles.sectionTitle}>ใส่เลข 2 หรือ 3 ตัวเพื่อดูคะแนน</h2>
+                </div>
+              </div>
+              <div className={styles.analyzeBox}>
+                <div className={styles.searchWrap}>
+                  <input
+                    className={styles.searchInput}
+                    value={query}
+                    maxLength={3}
+                    inputMode="numeric"
+                    onChange={e => setQuery(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                    placeholder="เช่น 16 หรือ 616"
+                  />
+                  <div className={styles.searchHint}>รองรับเลข 2 ตัว และ 3 ตัว</div>
+                </div>
+
+                <div className={styles.quickPickRow}>
+                  {stats.candidates2.slice(0, 8).map(item => (
+                    <button key={item.number} className={styles.quickChip} onClick={() => setQuery(item.number)}>
+                      {item.number}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
 
-            {tab === 'hot' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>2 ตัวล่างออกบ่อยที่สุด</div>
-                <div className={styles.barChart}>
-                  {stats.sortedBot2.slice(0, 15).map(([num, count], i) => (
-                    <div key={num} className={styles.barRow}>
-                      <div className={styles.barNum}>{num}</div>
-                      <div className={styles.barTrack}>
-                        <div className={styles.barFill} style={{ width: `${(count / maxBot2Count) * 100}%`, animationDelay: `${i * 40}ms` }} />
-                      </div>
-                      <div className={styles.barCount}>{count}</div>
-                    </div>
-                  ))}
+                {analysis ? <AnalysisCard analysis={analysis} /> : <div className={styles.empty}>ใส่เลข 2 หรือ 3 ตัวเพื่อเริ่มวิเคราะห์</div>}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {tab === 'hot' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>เลขเด่น</div>
+                  <h2 className={styles.sectionTitle}>เลข 2 ตัวที่ออกบ่อยที่สุด</h2>
                 </div>
               </div>
-            )}
-
-            {tab === 'cold' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>เลขเย็น/เลขขาดนาน</div>
-                <div className={styles.coldGrid}>
-                  {stats.cold.map(({ num, gap }, i) => (
-                    <div key={num} className={`${styles.coldCard} ${i === 0 ? styles.coldTop : ''}`} onClick={() => setNumberInput(num)}>
-                      <div className={styles.coldRank}>#{i + 1}</div>
-                      <div className={styles.coldNum}>{num}</div>
-                      <div className={styles.coldGap}>{gap > 999 ? 'ไม่เคยออก' : `หาย ${gap} งวด`}</div>
+              <div className={styles.rankingList}>
+                {stats.sortedBot2.slice(0, 20).map(([num, count], index) => (
+                  <button key={num} className={styles.rankRow} onClick={() => { setQuery(num); setTab('analyze') }}>
+                    <div className={styles.rankLeft}>
+                      <div className={styles.rankIndex}>#{index + 1}</div>
+                      <div className={styles.rankNumber}>{num}</div>
                     </div>
-                  ))}
+                    <div className={styles.rankRight}>
+                      <div className={styles.rankMain}>{count} ครั้ง</div>
+                      <div className={styles.rankSub}>แตะเพื่อวิเคราะห์ต่อ</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {tab === 'cold' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>เลขอั้น</div>
+                  <h2 className={styles.sectionTitle}>เลขที่หายไปนานที่สุด</h2>
                 </div>
               </div>
-            )}
-
-            {tab === 'tod' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>ชุดโต๊ด 3 ตัวยอดนิยม</div>
-                {stats.sortedTod.map(([key, count], i) => (
-                  <div key={key} className={styles.todRow}>
-                    <div className={styles.todRank}>{i + 1}</div>
-                    <div className={styles.todKey}>{key}</div>
-                    <div className={styles.todPermutations}>
-                      {getTodPermutations(key).map(p => <span key={p} className={styles.todPill}>{p}</span>)}
+              <div className={styles.coldGrid}>
+                {stats.cold.map((item, index) => (
+                  <button key={item.num} className={styles.coldCard} onClick={() => { setQuery(item.num); setTab('analyze') }}>
+                    <div className={styles.coldTopRow}>
+                      <span className={styles.coldRank}>#{index + 1}</span>
+                      <span className={styles.coldTap}>วิเคราะห์</span>
                     </div>
-                    <div className={styles.todCount}>{count}×</div>
+                    <div className={styles.coldNum}>{item.num}</div>
+                    <div className={styles.coldGap}>{item.gap > 999 ? 'ยังไม่เคยออก' : `หาย ${item.gap} งวด`}</div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+
+
+        {tab === 'heatmap' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>Heatmap 00-99</div>
+                  <h2 className={styles.sectionTitle}>แผนที่ความน่าจับตาของเลข 2 ตัว</h2>
+                </div>
+              </div>
+              <div className={styles.heatmapGrid}>
+                {advanced.heatmap.map(item => (
+                  <button
+                    key={item.number}
+                    className={styles.heatCell}
+                    style={{ opacity: 0.42 + item.score / 16 }}
+                    onClick={() => { setQuery(item.number); setTab('analyze') }}
+                    title={`${item.number}: ${item.score}/10`}
+                  >
+                    <span>{item.number}</span>
+                    <small>{item.score}</small>
+                  </button>
+                ))}
+              </div>
+              <p className={styles.caption}>สี/ความเด่นอิง Hybrid Score: Frequency + Gap + Markov + Monte Carlo</p>
+            </section>
+          </div>
+        )}
+
+        {tab === 'backtest' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>Strategy Backtest</div>
+                  <h2 className={styles.sectionTitle}>เปรียบเทียบสูตรย้อนหลังหลายแบบ</h2>
+                </div>
+              </div>
+              <div className={styles.strategyList}>
+                {advanced.strategyBacktests.map(item => (
+                  <StrategyCard key={item.label} item={item} />
+                ))}
+              </div>
+              <p className={styles.caption}>จำลองเลือก 3 เลขต่องวด เลขละ 5 บาท จ่ายคืน 90 บาทเมื่อถูก ใช้เพื่อวัดแนวโน้มของสูตร ไม่ใช่การันตีอนาคต</p>
+            </section>
+          </div>
+        )}
+
+        {tab === 'ai' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>AI Insight แบบไม่ใช้ API Key</div>
+                  <h2 className={styles.sectionTitle}>สรุปเหตุผลจากตัวเลขล้วน ๆ</h2>
+                </div>
+              </div>
+              <div className={styles.insightList}>
+                {advanced.aiInsights.map((text, index) => (
+                  <div key={text} className={styles.insightCard}>
+                    <div className={styles.insightIcon}>{index + 1}</div>
+                    <p>{text}</p>
                   </div>
                 ))}
-                {stats.sortedTod.length === 0 && <div className={styles.empty}>ยังไม่มีข้อมูล</div>}
               </div>
-            )}
+            </section>
 
-            {tab === 'backtest' && <BacktestCard result={backtest} />}
-
-            {tab === 'history' && (
-              <div className={styles.section}>
-                <div className={styles.sectionTitle}>ประวัติผลรางวัล</div>
-                <div className={styles.historyList}>
-                  {filtered.slice(0, 30).map((r, i) => (
-                    <div key={`${r.date}-${i}`} className={styles.historyRow}>
-                      <div className={styles.historyDate}>{formatDate(r.date)}</div>
-                      <div className={styles.historyNums}>
-                        <span className={styles.h3}>{r.top3 || '---'}</span>
-                        <span className={styles.hSep}>/</span>
-                        <span className={styles.h2}>{r.bot2 || '--'}</span>
-                      </div>
-                    </div>
-                  ))}
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>Markov Chain</div>
+                  <h2 className={styles.sectionTitle}>หลังเลขล่าสุด {advanced.markovSource} เคยตามด้วยเลขอะไร</h2>
                 </div>
               </div>
-            )}
+              <div className={styles.markovList}>
+                {advanced.markovTop.length > 0 ? advanced.markovTop.map(item => (
+                  <div key={item.number} className={styles.markovRow}>
+                    <span className={styles.markovNum}>{item.number}</span>
+                    <div className={styles.markovTrack}><div style={{ width: `${Math.min(item.probability, 100)}%` }} /></div>
+                    <span className={styles.markovProb}>{item.probability}%</span>
+                  </div>
+                )) : <div className={styles.empty}>ข้อมูล Markov ยังไม่พอสำหรับเลขล่าสุดนี้</div>}
+              </div>
+            </section>
           </div>
-        </main>
+        )}
 
-        <div className={styles.footer}>ใช้เพื่อวิเคราะห์สถิติเท่านั้น • จำกัดทุนและทดสอบสูตรก่อนเสมอ</div>
-      </div>
+        {tab === 'history' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>ประวัติผล</div>
+                  <h2 className={styles.sectionTitle}>ย้อนหลังล่าสุด 30 งวด</h2>
+                </div>
+              </div>
+              <div className={styles.historyList}>
+                {filtered.slice(0, 30).map((row, index) => (
+                  <div key={`${row.date}-${row.lottoType}-${index}`} className={styles.historyRow}>
+                    <div className={styles.historyDate}>{formatDate(row.date)}</div>
+                    <div className={styles.historyNumGroup}>
+                      <span className={`${styles.historyNumber} ${styles.historyGold}`}>{row.top3 || '---'}</span>
+                      <span className={`${styles.historyNumber} ${styles.historyPink}`}>{row.bot2 || '--'}</span>
+                      {row.top4 && <span className={`${styles.historyNumber} ${styles.historyBlue}`}>{row.top4}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        <footer className={styles.footer}>อัปเดตอัตโนมัติทุกวัน • ออกแบบใหม่ให้อ่านง่ายและใช้งานบนมือถือสะดวกขึ้น</footer>
+      </main>
     </>
   )
 }
 
-function AnalysisCard({ analysis }: { analysis: NumberAnalysis }) {
+function NumberBubble({ label, value, kind }: { label: string; value: string; kind: 'gold' | 'pink' | 'blue' }) {
   return (
-    <section className={styles.resultCard}>
-      <div className={styles.resultTop}>
-        <div>
-          <div className={styles.resultLabel}>ผลวิเคราะห์เลข {analysis.input}</div>
-          <div className={styles.resultStatus}>{analysis.status}</div>
-        </div>
-        <div className={`${styles.scoreBubble} ${styles[`risk_${analysis.risk}`]}`}>{analysis.score}</div>
-      </div>
-      <div className={styles.metricGrid}>
-        <Metric label="ชนิด" value={analysis.type} />
-        <Metric label="เคยออก" value={`${analysis.frequency} ครั้ง`} />
-        <Metric label="ห่างล่าสุด" value={`${analysis.gap} งวด`} />
-        <Metric label="ล่าสุด" value={analysis.lastSeenDate} />
-      </div>
-      <div className={styles.reasonList}>
-        {analysis.reasons.map(reason => <div key={reason} className={styles.reasonItem}>✦ {reason}</div>)}
-      </div>
-      <div className={styles.warningBox}>⚠️ {analysis.warning}</div>
-    </section>
-  )
-}
-
-function TopPicks({ recommendations }: { recommendations: { num: string; score: number; reason: string }[] }) {
-  return (
-    <section className={styles.resultCard}>
-      <div className={styles.resultLabel}>ยังไม่ได้ใส่เลข — ระบบเสนอเลขคัดกรองเบื้องต้น</div>
-      <div className={styles.miniPickRow}>
-        {recommendations.map(p => (
-          <div key={p.num} className={styles.miniPick}>
-            <strong>{p.num}</strong>
-            <span>{p.score}/10</span>
-          </div>
-        ))}
-      </div>
-      <div className={styles.warningBox}>แตะเลขในแท็บวิเคราะห์เพื่อดูเหตุผลแบบละเอียด</div>
-    </section>
-  )
-}
-
-function BacktestCard({ result }: { result: ReturnType<typeof runBacktest> }) {
-  return (
-    <section className={styles.section}>
-      <div className={styles.sectionTitle}>ทดสอบสูตรย้อนหลัง</div>
-      <div className={styles.backtestCard}>
-        <div className={styles.backtestHero}>
-          <div>
-            <div className={styles.backtestLabel}>เลือก 3 เลข/งวด จากข้อมูลย้อนหลัง 30 งวด</div>
-            <div className={styles.backtestProfit}>{result.profit >= 0 ? '+' : ''}{result.profit.toLocaleString()} บาท</div>
-          </div>
-          <div className={styles.backtestRoi}>{result.roi}% ROI</div>
-        </div>
-        <div className={styles.metricGrid}>
-          <Metric label="ทดสอบ" value={`${result.rounds} งวด`} />
-          <Metric label="เข้าเป้า" value={`${result.hits} ครั้ง`} />
-          <Metric label="อัตราเข้า" value={`${result.hitRate}%`} />
-          <Metric label="ทุนรวม" value={`${result.stake} บาท`} />
-        </div>
-        <div className={styles.warningBox}>สูตรนี้เป็น backtest แบบง่าย: แทงเลขละ 5 บาท จ่าย 90 เท่า ใช้ตรวจว่าระบบมีแต้มต่อไหม ไม่ใช่การรับประกันผลลัพธ์</div>
-      </div>
-    </section>
-  )
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className={styles.metricCard}>
-      <div className={styles.metricLabel}>{label}</div>
-      <div className={styles.metricValue}>{value}</div>
+    <div className={`${styles.numberBubble} ${styles[`numberBubble_${kind}`]}`}>
+      <div className={styles.numberLabel}>{label}</div>
+      <div className={styles.numberValue}>{value}</div>
     </div>
   )
 }
 
-function SummaryCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: 'accent' | 'cyan' }) {
+function MiniStat({ title, value, sub, emoji }: { title: string; value: string; sub: string; emoji: string }) {
   return (
-    <div className={`${styles.summaryCard} ${styles[`summaryCard_${color}`]}`}>
-      <div className={styles.summaryLabel}>{label}</div>
-      <div className={styles.summaryValue}>{value}</div>
-      <div className={styles.summarySub}>{sub}</div>
+    <div className={styles.miniCard}>
+      <div className={styles.miniTitle}><span>{emoji}</span>{title}</div>
+      <div className={styles.miniValue}>{value}</div>
+      <div className={styles.miniSub}>{sub}</div>
+    </div>
+  )
+}
+
+function BacktestItem({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className={styles.backtestItem}>
+      <div className={styles.backtestLabel}>{label}</div>
+      <div className={`${styles.backtestValue} ${accent ? styles.backtestValuePositive : ''}`}>{value}</div>
+    </div>
+  )
+}
+
+
+function AdvancedPickCard({ item, onClick }: { item: AdvancedPick; onClick: () => void }) {
+  return (
+    <button className={styles.candidateCard} onClick={onClick}>
+      <div className={styles.candidateTop}>
+        <span className={styles.candidateNum}>{item.number}</span>
+        <span className={styles.scoreBadge}>{item.score}/10</span>
+      </div>
+      <div className={styles.candidateLevel}>Confidence {item.confidence}% • Risk {riskThai(item.risk)}</div>
+      <div className={styles.candidateMeta}>Gap {item.gap} งวด • Markov {item.markovScore}/10 • MC {item.monteCarloScore}/10</div>
+    </button>
+  )
+}
+
+function StrategyCard({ item }: { item: StrategyBacktest }) {
+  return (
+    <div className={styles.strategyCard}>
+      <div>
+        <div className={styles.strategyName}>{item.label}</div>
+        <div className={styles.strategySub}>{item.wins}/{item.rounds} งวด • Hit rate {item.hitRate}%</div>
+      </div>
+      <div className={styles.strategyMetrics}>
+        <span className={item.profit >= 0 ? styles.profitGood : styles.profitBad}>{item.profit}</span>
+        <small>ROI {item.roi}%</small>
+      </div>
+    </div>
+  )
+}
+
+function riskThai(risk: AdvancedPick['risk']) {
+  if (risk === 'low') return 'ต่ำ'
+  if (risk === 'high') return 'สูง'
+  return 'กลาง'
+}
+
+function AnalysisCard({ analysis }: { analysis: NumberAnalysis }) {
+  return (
+    <div className={styles.analysisCard}>
+      <div className={styles.analysisHeader}>
+        <div>
+          <div className={styles.analysisType}>{analysis.type}</div>
+          <div className={styles.analysisNumber}>{analysis.number}</div>
+        </div>
+        <div className={styles.analysisScoreWrap}>
+          <div className={styles.analysisScore}>{analysis.score}</div>
+          <div className={styles.analysisScoreLabel}>คะแนน / 10</div>
+        </div>
+      </div>
+
+      <div className={styles.analysisTag}>{analysis.level}</div>
+
+      <div className={styles.analysisGrid}>
+        <div className={styles.analysisMetric}><span>ออกทั้งหมด</span><strong>{analysis.frequencyAll} ครั้ง</strong></div>
+        <div className={styles.analysisMetric}><span>ออกใน 30 งวด</span><strong>{analysis.frequency30} ครั้ง</strong></div>
+        <div className={styles.analysisMetric}><span>ขาดไป</span><strong>{analysis.gap} งวด</strong></div>
+        <div className={styles.analysisMetric}><span>สัญญาณโต๊ด</span><strong>{analysis.todMatches} ครั้ง</strong></div>
+        {analysis.reverseNumber && (
+          <div className={styles.analysisMetric}><span>เลขกลับ</span><strong>{analysis.reverseNumber}</strong></div>
+        )}
+        {typeof analysis.reverseFrequency === 'number' && (
+          <div className={styles.analysisMetric}><span>เลขกลับออก</span><strong>{analysis.reverseFrequency} ครั้ง</strong></div>
+        )}
+      </div>
+
+      <div className={styles.reasonsBox}>
+        <div className={styles.reasonsTitle}>เหตุผลจากข้อมูล</div>
+        <ul className={styles.reasonsList}>
+          {analysis.reasons.length > 0 ? analysis.reasons.map(reason => <li key={reason}>{reason}</li>) : <li>ยังไม่มีเหตุผลเด่นพอจากข้อมูล</li>}
+        </ul>
+      </div>
     </div>
   )
 }
@@ -362,8 +557,9 @@ function SummaryCard({ label, value, sub, color }: { label: string; value: strin
 function LoadingScreen() {
   return (
     <div className={styles.center}>
-      <div className={styles.spinner} />
-      <div className={styles.loadingText}>กำลังโหลดข้อมูล...</div>
+      <div className={styles.loaderPlanet} />
+      <div className={styles.centerTitle}>กำลังโหลดข้อมูล</div>
+      <div className={styles.centerText}>รอสักครู่ ระบบกำลังเตรียมข้อมูลหวยให้อยู่ครับ</div>
     </div>
   )
 }
@@ -371,27 +567,17 @@ function LoadingScreen() {
 function ErrorScreen({ msg }: { msg: string }) {
   return (
     <div className={styles.center}>
-      <div className={styles.errorIcon}>⚠️</div>
-      <div className={styles.errorMsg}>{msg}</div>
-      <div className={styles.errorHint}>ตั้งค่า GITHUB_CSV_URL ใน Vercel Environment Variables</div>
+      <div className={styles.centerEmoji}>⚠️</div>
+      <div className={styles.centerTitle}>โหลดข้อมูลไม่สำเร็จ</div>
+      <div className={styles.centerText}>{msg}</div>
+      <div className={styles.centerHint}>ตรวจสอบ GITHUB_CSV_URL ใน Vercel Environment Variables อีกครั้ง</div>
     </div>
   )
 }
 
-function getTodPermutations(key: string): string[] {
-  if (key.length !== 3) return [key]
-  const [a, b, c] = key.split('')
-  const perms = new Set([`${a}${b}${c}`, `${a}${c}${b}`, `${b}${a}${c}`, `${b}${c}${a}`, `${c}${a}${b}`, `${c}${b}${a}`])
-  return [...perms].slice(0, 6)
-}
-
-function formatDate(d: string): string {
-  if (!d) return '-'
-  try {
-    const date = new Date(d)
-    if (isNaN(date.getTime())) return d
-    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
-  } catch {
-    return d
-  }
+function formatDate(dateString: string) {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return dateString
+  return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
 }
