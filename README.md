@@ -1,87 +1,62 @@
-# 🛸 Alieninburi Lotto Analytics
+# 🎯 Alieninburi Lotto App
 
-เว็บแอปวิเคราะห์สถิติหวย สำหรับมือถือ ทำงานบน Vercel
-
-## Tech Stack
-- Next.js 14 (Pages Router)
-- TypeScript
-- CSS Modules
-- Deployed on Vercel
+วิเคราะห์สถิติหวยจาก CSV — Next.js 14 · Deploy บน Vercel
 
 ---
 
-## วิธี Deploy บน Vercel
+## Deploy บน Vercel (ครั้งแรก)
 
-### 1. Upload โปรเจกต์นี้ขึ้น GitHub repo ใหม่
+1. Push โค้ดนี้ขึ้น GitHub repo ของคุณ
+2. ไปที่ [vercel.com](https://vercel.com) → **Add New Project** → เลือก repo นี้
+3. กด **Deploy** ได้เลย — ไม่ต้องตั้งค่าอะไรเพิ่ม
+
+---
+
+## อัปเดต CSV ข้อมูลใหม่
+
+```
+1. ดาวน์โหลด CSV ใหม่จาก alieninburi
+2. เปลี่ยนชื่อไฟล์เป็น  lotto_data.csv
+3. วางทับที่  public/lotto_data.csv
+4. git add public/lotto_data.csv
+5. git commit -m "update data"
+6. git push
+```
+
+Vercel จะ deploy ให้อัตโนมัติภายใน ~1 นาที
+
+---
+
+## รันบนเครื่องตัวเอง
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/YOUR_USERNAME/lotto-web.git
-git push -u origin main
+npm install
+npm run dev
+# เปิด http://localhost:3000
 ```
-
-### 2. ไปที่ vercel.com → New Project → Import repo
-
-### 3. ตั้งค่า Environment Variable ใน Vercel
-
-| Variable | Value |
-|---|---|
-| `GITHUB_CSV_URL` | URL ของไฟล์ CSV ดิบใน GitHub |
-
-**ตัวอย่าง URL:**
-```
-https://raw.githubusercontent.com/YOUR_USERNAME/lotto/main/alieninburi_lotto_data.csv
-```
-
-> ถ้า repo เป็น Private ให้ใช้ GitHub Token แทน และแก้ API route ใน `pages/api/lotto.ts`
-
-### 4. กด Deploy → รอสักครู่ → เสร็จแล้ว! 🚀
 
 ---
 
-## โครงสร้างโปรเจกต์
+## โครงสร้างที่สำคัญ
 
 ```
+├── public/
+│   └── lotto_data.csv      ← อัปเดตไฟล์นี้เพื่อเปลี่ยนข้อมูล
 ├── pages/
-│   ├── _app.tsx         # App wrapper
-│   ├── _document.tsx    # HTML document
-│   ├── index.tsx        # หน้าหลัก
-│   ├── index.module.css # Styles
-│   └── api/
-│       └── lotto.ts     # API route ดึง CSV
+│   ├── index.tsx           ← UI หลัก
+│   └── api/lotto.ts        ← API อ่าน CSV
 ├── lib/
-│   └── parseCSV.ts      # Parser + stats engine
-├── styles/
-│   └── globals.css      # Global styles
-└── public/              # Static assets
+│   └── parseCSV.ts         ← logic วิเคราะห์ทั้งหมด
+└── vercel.json             ← config สำหรับ Vercel
 ```
 
 ---
 
-## ฟีเจอร์
+## Format CSV
 
-- 🔥 **ร้อนแรง** — 2 ตัวล่างออกบ่อยที่สุด พร้อม bar chart
-- ❄️ **เลขอั้น** — เลขที่หายนานที่สุด
-- 🎲 **โต๊ด** — ชุด 3 ตัวโต๊ดยอดนิยม พร้อม permutations
-- 📋 **ประวัติ** — ผลรางวัลย้อนหลัง 30 งวด
-- 📱 Mobile-first design, dark theme
-- ⚡ Fast — ข้อมูล cache 5 นาที
-
----
-
-## หากต้องการ Private CSV
-
-แก้ไข `pages/api/lotto.ts`:
-
-```typescript
-const response = await fetch(GITHUB_RAW, {
-  headers: {
-    'Authorization': `token ${process.env.GITHUB_TOKEN}`,
-    'Accept': 'application/vnd.github.v3.raw',
-  }
-})
+```
+วันที่,รหัสหวย,รางวัลทั้งหมด,4ตัวบน,3ตัวบน,2ตัวล่าง
+2026-05-04,GLO,...,...,456,78
 ```
 
-แล้วเพิ่ม `GITHUB_TOKEN` ใน Vercel Environment Variables
+รองรับทั้ง format คอลัมน์แยก และ JSON ใน `รางวัลทั้งหมด`
