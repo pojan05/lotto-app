@@ -95,15 +95,10 @@ function parseCSVLine(line: string): string[] {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i]
     if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"'
-        i += 1
-      } else {
-        inQuotes = !inQuotes
-      }
+      if (inQuotes && line[i + 1] === '"') { current += '"'; i += 1 }
+      else inQuotes = !inQuotes
     } else if (ch === ',' && !inQuotes) {
-      result.push(current)
-      current = ''
+      result.push(current); current = ''
     } else {
       current += ch
     }
@@ -113,71 +108,43 @@ function parseCSVLine(line: string): string[] {
 }
 
 export const LOTTO_NAMES: Record<string, string> = {
-  GLO: '🇹🇭 หวยรัฐบาลไทย',
-  BAAC: '🌾 ธ.ก.ส.',
-  GSB: '🏦 ออมสิน',
-  SET: '📈 หุ้นไทย (SET)',
-  KTOP30: '📊 หุ้นไทย K-Top30',
-  KTOPVIP: '📊 หุ้นไทย K-Top VIP',
-  DAX: '🇩🇪 หุ้นเยอรมัน (DAX)',
-  DJI: '🇺🇸 ดาวโจนส์ (DJI)',
-  DJIVIP: '🇺🇸 ดาวโจนส์ VIP',
-  BSE: '🇮🇳 หุ้นอินเดีย (BSE)',
-  EGX30: '🇪🇬 หุ้นอียิปต์ (EGX30)',
-  HSI_1: '🇭🇰 ฮั่งเส็ง รอบ 1',
-  HSI_2: '🇭🇰 ฮั่งเส็ง รอบ 2',
-  HSIVIP_1: '🇭🇰 ฮั่งเส็ง VIP รอบ 1',
-  HSIVIP_2: '🇭🇰 ฮั่งเส็ง VIP รอบ 2',
-  NKY_1: '🇯🇵 นิเคอิ รอบ 1',
-  NKY_2: '🇯🇵 นิเคอิ รอบ 2',
-  NKYVIP_1: '🇯🇵 นิเคอิ VIP รอบ 1',
-  NKYVIP_2: '🇯🇵 นิเคอิ VIP รอบ 2',
-  STI: '🇸🇬 หุ้นสิงคโปร์ (STI)',
-  STIVIP: '🇸🇬 หุ้นสิงคโปร์ VIP',
-  SZSE_1: '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 1',
-  SZSE_2: '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 2',
-  SZSEVIP_1: '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 1',
-  SZSEVIP_2: '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 2',
-  TAIEX: '🇹🇼 หุ้นไต้หวัน (TAIEX)',
-  TAIEXCIP: '🇹🇼 หุ้นไต้หวัน CIP',
-  UKX: '🇬🇧 หุ้นอังกฤษ (FTSE)',
-  UKXVIP: '🇬🇧 หุ้นอังกฤษ VIP',
-  MOEX: '🇷🇺 หุ้นรัสเซีย (MOEX)',
-  LOEX: '🌍 หุ้น LOEX',
-  LATV: '🇱🇦 หวยลาว TV',
-  LAVIP: '🇱🇦 หวยลาว VIP',
-  LAHD: '🇱🇦 หวยลาว HD',
-  LASMK: '🇱🇦 หวยลาว SMK',
-  LASTR: '🇱🇦 หวยลาว Star',
-  LASTRVIP: '🇱🇦 หวยลาว Star VIP',
-  LATK5D: '🇱🇦 หวยลาว TK 5D',
-  LATKVIP: '🇱🇦 หวยลาว TK VIP',
-  LALOT: '🇱🇦 หวยลาว Lot',
-  Laaoo: '🇱🇦 หวยลาว',
-  VNLOT: '🇻🇳 หวยเวียดนาม Lot',
-  VNSTR: '🇻🇳 หวยเวียดนาม Star',
-  VNTV: '🇻🇳 หวยเวียดนาม TV',
-  VNVIP: '🇻🇳 หวยเวียดนาม VIP',
-  VNAS: '🇻🇳 หวยเวียดนาม AS',
-  VNEXT: '🇻🇳 หวยเวียดนาม EXT',
-  VNHD: '🇻🇳 หวยเวียดนาม HD',
-  VNKCH: '🇻🇳 หวยเวียดนาม KCH',
-  VNPTN: '🇻🇳 หวยเวียดนาม PTN',
-  VNSPC_2: '🇻🇳 หวยเวียดนาม SPC รอบ 2',
-  VNSPCb: '🇻🇳 หวยเวียดนาม SPC B',
-  GRAND_DRAGON_4D: '🐉 Grand Dragon 4D',
-  MAGNUM: '🇲🇾 หวยมาเลย์ Magnum',
-  MAGNUM_4D: '🇲🇾 หวยมาเลย์ Magnum 4D',
-  SINGAPORE_4D: '🇸🇬 หวยสิงคโปร์ 4D',
+  GLO: '🇹🇭 หวยรัฐบาลไทย', BAAC: '🌾 ธ.ก.ส.', GSB: '🏦 ออมสิน',
+  SET: '📈 หุ้นไทย SET', KTOP30: '📊 หุ้นไทย K-Top30', KTOPVIP: '📊 หุ้นไทย K-Top VIP',
+  DAX: '🇩🇪 หุ้นเยอรมัน DAX', DJI: '🇺🇸 ดาวโจนส์', DJIVIP: '🇺🇸 ดาวโจนส์ VIP',
+  BSE: '🇮🇳 หุ้นอินเดีย', EGX30: '🇪🇬 หุ้นอียิปต์',
+  HSI_1: '🇭🇰 ฮั่งเส็ง รอบ 1', HSI_2: '🇭🇰 ฮั่งเส็ง รอบ 2',
+  HSIVIP_1: '🇭🇰 ฮั่งเส็ง VIP รอบ 1', HSIVIP_2: '🇭🇰 ฮั่งเส็ง VIP รอบ 2',
+  NKY_1: '🇯🇵 นิเคอิ รอบ 1', NKY_2: '🇯🇵 นิเคอิ รอบ 2',
+  NKYVIP_1: '🇯🇵 นิเคอิ VIP รอบ 1', NKYVIP_2: '🇯🇵 นิเคอิ VIP รอบ 2',
+  STI: '🇸🇬 หุ้นสิงคโปร์', STIVIP: '🇸🇬 หุ้นสิงคโปร์ VIP',
+  SZSE_1: '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 1', SZSE_2: '🇨🇳 หุ้นจีน เซินเจิ้น รอบ 2',
+  SZSEVIP_1: '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 1', SZSEVIP_2: '🇨🇳 หุ้นจีน เซินเจิ้น VIP รอบ 2',
+  TAIEX: '🇹🇼 หุ้นไต้หวัน', TAIEXCIP: '🇹🇼 หุ้นไต้หวัน CIP',
+  UKX: '🇬🇧 หุ้นอังกฤษ FTSE', UKXVIP: '🇬🇧 หุ้นอังกฤษ VIP',
+  MOEX: '🇷🇺 หุ้นรัสเซีย', LOEX: '🌍 หุ้น LOEX',
+  LATV: '🇱🇦 หวยลาว TV', LAVIP: '🇱🇦 หวยลาว VIP', LAHD: '🇱🇦 หวยลาว HD',
+  LASMK: '🇱🇦 หวยลาว SMK', LASTR: '🇱🇦 หวยลาว Star', LASTRVIP: '🇱🇦 หวยลาว Star VIP',
+  LATK5D: '🇱🇦 หวยลาว TK 5D', LATKVIP: '🇱🇦 หวยลาว TK VIP', LALOT: '🇱🇦 หวยลาว Lot',
+  Laaoo: '🇱🇦 หวยลาว', VNLOT: '🇻🇳 หวยเวียดนาม Lot', VNSTR: '🇻🇳 หวยเวียดนาม Star',
+  VNTV: '🇻🇳 หวยเวียดนาม TV', VNVIP: '🇻🇳 หวยเวียดนาม VIP', VNAS: '🇻🇳 หวยเวียดนาม AS',
+  VNEXT: '🇻🇳 หวยเวียดนาม EXT', VNHD: '🇻🇳 หวยเวียดนาม HD', VNKCH: '🇻🇳 หวยเวียดนาม KCH',
+  VNPTN: '🇻🇳 หวยเวียดนาม PTN', VNSPC_2: '🇻🇳 หวยเวียดนาม SPC รอบ 2', VNSPCb: '🇻🇳 หวยเวียดนาม SPC B',
+  GRAND_DRAGON_4D: '🐉 Grand Dragon 4D', MAGNUM: '🇲🇾 Magnum', MAGNUM_4D: '🇲🇾 Magnum 4D',
+  SINGAPORE_4D: '🇸🇬 สิงคโปร์ 4D',
+  // Lao Extra
+  LAO_EXTRA: '🇱🇦 หวยลาว EXTRA',
 }
 
 export function getLottoName(code: string): string {
   if (LOTTO_NAMES[code]) return LOTTO_NAMES[code]
-  if (code.startsWith('LV_R')) return `🎰 หวยหุ้น รอบ ${code.replace('LV_R', '')}`
+  if (code.startsWith('LV_R')) return `🎰 หุ้น รอบ ${code.replace('LV_R', '')}`
   return code
 }
 
+const ALL_2D = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'))
+
 export function getStats(rows: ParsedResult[]): LottoStats {
+  const n = rows.length
   const bot2Counts: Record<string, number> = {}
   const top3Counts: Record<string, number> = {}
   const todCounts: Record<string, number> = {}
@@ -192,107 +159,72 @@ export function getStats(rows: ParsedResult[]): LottoStats {
   const sortedTop3 = Object.entries(top3Counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   const sortedTod = Object.entries(todCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 12)
 
+  // cold: ใช้ n (จำนวนงวดที่มีจริง) ไม่ใช่ constant 100
   const bot2List = rows.map(r => r.bot2).filter(v => /^\d{2}$/.test(v))
-  const allNums = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'))
-  const cold = allNums
+  const cold = ALL_2D
     .map(num => {
       const idx = bot2List.indexOf(num)
-      return { num, gap: idx === -1 ? bot2List.length + 999 : idx }
+      return { num, gap: idx === -1 ? n + 99 : idx }
     })
+    .filter(item => item.gap > 0) // ต้องไม่ใช่งวดล่าสุด
     .sort((a, b) => b.gap - a.gap || a.num.localeCompare(b.num))
     .slice(0, 12)
 
-  const candidates2 = allNums
+  const candidates2 = ALL_2D
     .map(num => analyze2D(rows, num))
-    .sort((a, b) => b.score - a.score || b.frequency30 - a.frequency30 || b.gap - a.gap || a.number.localeCompare(b.number))
+    .sort((a, b) => b.score - a.score || b.gap - a.gap || a.number.localeCompare(b.number))
     .slice(0, 12)
 
-  return {
-    bot2Counts,
-    top3Counts,
-    todCounts,
-    sortedBot2,
-    sortedTop3,
-    sortedTod,
-    cold,
-    candidates2,
-  }
+  return { bot2Counts, top3Counts, todCounts, sortedBot2, sortedTop3, sortedTod, cold, candidates2 }
 }
 
 export function analyzeNumber(rows: ParsedResult[], inputRaw: string): NumberAnalysis | null {
   const input = inputRaw.trim()
   if (!/^\d{2,3}$/.test(input)) return null
-
-  if (input.length === 2) {
-    return analyze2D(rows, input)
-  }
-
-  return analyze3D(rows, input)
+  return input.length === 2 ? analyze2D(rows, input) : analyze3D(rows, input)
 }
 
 function analyze2D(rows: ParsedResult[], num: string): NumberAnalysis {
   const bot2List = rows.map(r => r.bot2).filter(v => /^\d{2}$/.test(v))
-  const last30 = bot2List.slice(0, 30)
+  const n = bot2List.length
+  const last30 = bot2List.slice(0, Math.min(30, n))
   const frequencyAll = bot2List.filter(v => v === num).length
   const frequency30 = last30.filter(v => v === num).length
-  const gap = bot2List.indexOf(num)
+  const gap = bot2List.indexOf(num) // -1 = ไม่เคยออก, 0 = งวดล่าสุด
   const reverseNumber = num.split('').reverse().join('')
   const reverseFrequency = bot2List.filter(v => v === reverseNumber).length
   const recentHit = bot2List.slice(0, 5).includes(num)
 
   let todMatches = 0
-  for (const row of rows.slice(0, 30)) {
-    if (row.top3.includes(num[0]) && row.top3.includes(num[1])) {
-      todMatches += 1
-    }
+  for (const row of rows.slice(0, Math.min(30, n))) {
+    if (row.top3.includes(num[0]) && row.top3.includes(num[1])) todMatches++
   }
 
   let score = 0
   const reasons: string[] = []
+  const gapVal = gap === -1 ? n + 5 : gap
 
   score += Math.min(frequency30 * 1.8, 3)
-  if (frequency30 > 0) reasons.push(`ออกใน 30 งวดล่าสุด ${frequency30} ครั้ง`)
+  if (frequency30 > 0) reasons.push(`ออกใน ${Math.min(30, n)} งวดล่าสุด ${frequency30} ครั้ง`)
 
-  const gapValue = gap === -1 ? bot2List.length + 5 : gap
-  if (gapValue >= 8) {
-    score += 3
-    reasons.push(`ขาดไป ${gapValue} งวด`)
-  } else if (gapValue >= 4) {
-    score += 2
-    reasons.push(`ห่างจากงวดล่าสุด ${gapValue} งวด`)
-  } else if (gapValue >= 1) {
-    score += 0.8
-    reasons.push(`เพิ่งหายไป ${gapValue} งวด`)
+  if (gapVal >= 8) { score += 3; reasons.push(`ขาดไป ${gapVal} งวด`) }
+  else if (gapVal >= 4) { score += 2; reasons.push(`ห่างมา ${gapVal} งวด`) }
+  else if (gapVal >= 1) { score += 0.8; reasons.push(`เพิ่งหาย ${gapVal} งวด`) }
+
+  if (recentHit) { score -= 1.5; reasons.push('เพิ่งออกใน 5 งวดล่าสุด') }
+
+  if (num !== reverseNumber && reverseFrequency >= 2) {
+    score += 1; reasons.push(`เลขกลับ ${reverseNumber} ออก ${reverseFrequency} ครั้ง`)
   }
-
-  if (recentHit) {
-    score -= 1.5
-    reasons.push('เพิ่งออกในช่วง 5 งวดล่าสุด')
-  }
-
-  if (reverseFrequency >= 2) {
-    score += 1
-    reasons.push(`เลขกลับ ${reverseNumber} เคยออก ${reverseFrequency} ครั้ง`)
-  }
-
-  if (todMatches >= 2) {
-    score += 1.2
-    reasons.push(`มีความเชื่อมโยงกับโต๊ดใน 30 งวดล่าสุด ${todMatches} ครั้ง`)
-  }
-
-  score = clamp(score, 0, 10)
+  if (todMatches >= 2) { score += 1.2; reasons.push(`เชื่อมโยงโต๊ด ${todMatches} ครั้ง`) }
 
   return {
-    number: num,
-    type: '2D',
-    frequencyAll,
-    frequency30,
-    gap: gap === -1 ? bot2List.length : gap,
-    reverseNumber,
-    reverseFrequency,
-    recentHit,
-    todMatches,
-    score: round1(score),
+    number: num, type: '2D',
+    frequencyAll, frequency30,
+    gap: gap === -1 ? n : gap,
+    reverseNumber, reverseFrequency,
+    recentHit, todMatches,
+    score: round1(clamp(score, 0, 10)),
     level: getLevel(score),
     reasons,
   }
@@ -300,50 +232,34 @@ function analyze2D(rows: ParsedResult[], num: string): NumberAnalysis {
 
 function analyze3D(rows: ParsedResult[], num: string): NumberAnalysis {
   const top3List = rows.map(r => r.top3).filter(v => /^\d{3}$/.test(v))
-  const last30 = top3List.slice(0, 30)
+  const n = top3List.length
+  const last30 = top3List.slice(0, Math.min(30, n))
   const frequencyAll = top3List.filter(v => v === num).length
   const frequency30 = last30.filter(v => v === num).length
   const gap = top3List.indexOf(num)
   const key = num.split('').sort().join('')
-  const todMatches = rows.slice(0, 30).filter(r => r.todKey === key).length
+  const todMatches = rows.slice(0, Math.min(30, n)).filter(r => r.todKey === key).length
   const recentHit = top3List.slice(0, 8).includes(num)
 
   let score = 0
   const reasons: string[] = []
+  const gapVal = gap === -1 ? n + 5 : gap
 
   score += Math.min(frequency30 * 2, 2.5)
-  if (frequency30 > 0) reasons.push(`ออกใน 30 งวดล่าสุด ${frequency30} ครั้ง`)
+  if (frequency30 > 0) reasons.push(`ออกใน ${Math.min(30, n)} งวดล่าสุด ${frequency30} ครั้ง`)
 
-  const gapValue = gap === -1 ? top3List.length + 5 : gap
-  if (gapValue >= 10) {
-    score += 3.2
-    reasons.push(`ขาดไป ${gapValue} งวด`)
-  } else if (gapValue >= 5) {
-    score += 2.1
-    reasons.push(`ห่างจากงวดล่าสุด ${gapValue} งวด`)
-  }
+  if (gapVal >= 10) { score += 3.2; reasons.push(`ขาดไป ${gapVal} งวด`) }
+  else if (gapVal >= 5) { score += 2.1; reasons.push(`ห่างมา ${gapVal} งวด`) }
 
-  if (todMatches >= 2) {
-    score += 2.4
-    reasons.push(`โต๊ดชุด ${key} พบ ${todMatches} ครั้งใน 30 งวดล่าสุด`)
-  }
-
-  if (recentHit) {
-    score -= 1.5
-    reasons.push('เพิ่งออกในช่วงใกล้ ๆ นี้')
-  }
-
-  score = clamp(score, 0, 10)
+  if (todMatches >= 2) { score += 2.4; reasons.push(`โต๊ดชุด ${key} พบ ${todMatches} ครั้ง`) }
+  if (recentHit) { score -= 1.5; reasons.push('เพิ่งออกในช่วงนี้') }
 
   return {
-    number: num,
-    type: '3D',
-    frequencyAll,
-    frequency30,
-    gap: gap === -1 ? top3List.length : gap,
-    recentHit,
-    todMatches,
-    score: round1(score),
+    number: num, type: '3D',
+    frequencyAll, frequency30,
+    gap: gap === -1 ? n : gap,
+    recentHit, todMatches,
+    score: round1(clamp(score, 0, 10)),
     level: getLevel(score),
     reasons,
   }
@@ -351,141 +267,70 @@ function analyze3D(rows: ParsedResult[], num: string): NumberAnalysis {
 
 export function getQuickBacktest(rows: ParsedResult[]) {
   const validRows = rows.filter(r => /^\d{2}$/.test(r.bot2))
-  if (validRows.length < 12) {
-    return {
-      rounds: validRows.length,
-      picksPerRound: 0,
-      wins: 0,
-      spent: 0,
-      returned: 0,
-      profit: 0,
-      roi: 0,
-      hitRate: 0,
-    }
-  }
+  const n = validRows.length
+  if (n < 8) return { rounds: n, picksPerRound: 0, wins: 0, spent: 0, returned: 0, profit: 0, roi: 0, hitRate: 0 }
 
-  let wins = 0
-  let spent = 0
-  let returned = 0
+  let wins = 0; let spent = 0; let returned = 0
   const picksPerRound = 3
 
-  for (let i = validRows.length - 2; i >= 0; i--) {
+  for (let i = n - 2; i >= 0; i--) {
     const history = validRows.slice(i + 1)
-    const ranked = Array.from({ length: 100 }, (_, n) => n.toString().padStart(2, '0'))
+    const picks = ALL_2D
       .map(num => analyze2D(history, num))
-      .sort((a, b) => b.score - a.score || b.frequency30 - a.frequency30 || b.gap - a.gap)
+      .sort((a, b) => b.score - a.score || b.gap - a.gap)
       .slice(0, picksPerRound)
-      .map(item => item.number)
-
+      .map(x => x.number)
     spent += picksPerRound * 5
-    if (ranked.includes(validRows[i].bot2)) {
-      wins += 1
-      returned += 90
-    }
+    if (picks.includes(validRows[i].bot2)) { wins++; returned += 90 }
   }
 
-  const rounds = Math.max(validRows.length - 1, 0)
+  const rounds = n - 1
   const profit = returned - spent
-  const roi = spent > 0 ? (profit / spent) * 100 : 0
-  const hitRate = rounds > 0 ? (wins / rounds) * 100 : 0
-
-  return {
-    rounds,
-    picksPerRound,
-    wins,
-    spent,
-    returned,
-    profit,
-    roi: round1(roi),
-    hitRate: round1(hitRate),
-  }
-}
-
-function getLevel(score: number): NumberAnalysis['level'] {
-  if (score >= 7.5) return 'เด่นมาก'
-  if (score >= 6) return 'น่าจับตา'
-  if (score >= 4) return 'พอมีทรง'
-  return 'ยังไม่เด่น'
-}
-
-function round1(n: number) {
-  return Math.round(n * 10) / 10
-}
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n))
+  return { rounds, picksPerRound, wins, spent, returned, profit, roi: round1(spent > 0 ? (profit / spent) * 100 : 0), hitRate: round1(rounds > 0 ? (wins / rounds) * 100 : 0) }
 }
 
 export interface AdvancedPick {
-  number: string
-  score: number
-  confidence: number
-  baseScore: number
-  markovScore: number
-  monteCarloScore: number
-  frequency30: number
-  gap: number
-  risk: 'low' | 'medium' | 'high'
-  reasons: string[]
+  number: string; score: number; confidence: number; baseScore: number
+  markovScore: number; monteCarloScore: number; frequency30: number; gap: number
+  risk: 'low' | 'medium' | 'high'; reasons: string[]
 }
 
 export interface StrategyBacktest {
-  strategy: string
-  label: string
-  rounds: number
-  wins: number
-  hitRate: number
-  spent: number
-  returned: number
-  profit: number
-  roi: number
+  strategy: string; label: string; rounds: number; wins: number
+  hitRate: number; spent: number; returned: number; profit: number; roi: number
 }
 
 export interface AdvancedAnalytics {
-  picks: AdvancedPick[]
-  heatmap: AdvancedPick[]
-  markovSource: string
-  markovTop: { number: string; probability: number; count: number }[]
-  monteCarloRuns: number
-  strategyBacktests: StrategyBacktest[]
-  aiInsights: string[]
+  picks: AdvancedPick[]; heatmap: AdvancedPick[]
+  markovSource: string; markovTop: { number: string; probability: number; count: number }[]
+  monteCarloRuns: number; strategyBacktests: StrategyBacktest[]; aiInsights: string[]
 }
-
-const ALL_2D = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'))
 
 export function getAdvancedAnalytics(rows: ParsedResult[]): AdvancedAnalytics {
   const cleanRows = rows.filter(r => /^\d{2}$/.test(r.bot2))
+  const n = cleanRows.length
   const bot2List = cleanRows.map(r => r.bot2)
   const latest = bot2List[0] || '--'
   const markov = buildMarkov(cleanRows)
   const markovMap = markov.transitions[latest] || {}
-  const markovTotal = Object.values(markovMap).reduce((sum, value) => sum + value, 0)
-  const monteCarlo = runMonteCarlo(cleanRows, markovMap, markovTotal, 50000)
+  const markovTotal = Object.values(markovMap).reduce((s, v) => s + v, 0)
+
+  // Monte Carlo runs ปรับตาม data size เพื่อความเร็ว
+  const mcRuns = n < 30 ? 5000 : n < 100 ? 15000 : 30000
+  const monteCarlo = runMonteCarlo(cleanRows, markovMap, markovTotal, mcRuns)
 
   const heatmap = ALL_2D.map(num => {
     const base = analyze2D(cleanRows, num)
-    const markovProbability = markovTotal > 0 ? (markovMap[num] || 0) / markovTotal : 0
-    const markovScore = clamp(markovProbability * 100, 0, 10)
-    const monteCarloProbability = monteCarlo.probability[num] || 0
-    const monteCarloScore = clamp(monteCarloProbability * 100, 0, 10)
+    const markovP = markovTotal > 0 ? (markovMap[num] || 0) / markovTotal : 0
+    const markovScore = clamp(markovP * 100, 0, 10)
+    const mcP = monteCarlo.probability[num] || 0
+    const monteCarloScore = clamp(mcP * 100, 0, 10)
     const gapPressure = clamp(base.gap / 12, 0, 2)
     const combined = clamp((base.score * 0.48) + (markovScore * 0.24) + (monteCarloScore * 0.18) + gapPressure, 0, 10)
     const risk = getRiskLevel(base, combined)
-    const confidence = clamp((combined * 7.5) + (base.frequency30 * 3) + (markovProbability * 100), 0, 99)
-    const reasons = buildAdvancedReasons(base, markovProbability, monteCarloProbability, combined, risk)
-
-    return {
-      number: num,
-      score: round1(combined),
-      confidence: round1(confidence),
-      baseScore: base.score,
-      markovScore: round1(markovScore),
-      monteCarloScore: round1(monteCarloScore),
-      frequency30: base.frequency30,
-      gap: base.gap,
-      risk,
-      reasons,
-    }
+    const confidence = clamp((combined * 7.5) + (base.frequency30 * 3) + (markovP * 100), 0, 99)
+    const reasons = buildAdvancedReasons(base, markovP, mcP, combined, risk)
+    return { number: num, score: round1(combined), confidence: round1(confidence), baseScore: base.score, markovScore: round1(markovScore), monteCarloScore: round1(monteCarloScore), frequency30: base.frequency30, gap: base.gap, risk, reasons }
   })
 
   const sortedHeatmap = [...heatmap].sort((a, b) => b.score - a.score || b.confidence - a.confidence || b.gap - a.gap || a.number.localeCompare(b.number))
@@ -495,206 +340,140 @@ export function getAdvancedAnalytics(rows: ParsedResult[]): AdvancedAnalytics {
     .sort((a, b) => b.probability - a.probability || a.number.localeCompare(b.number))
     .slice(0, 10)
 
-  const strategyBacktests = getStrategyBacktests(cleanRows)
-  const aiInsights = buildAiInsights(sortedHeatmap, markovTop, strategyBacktests, latest, cleanRows.length)
+  // ทำ strategy backtest เฉพาะถ้ามีข้อมูลพอ
+  const strategyBacktests = n >= 10 ? getStrategyBacktests(cleanRows) : []
+  const aiInsights = buildAiInsights(sortedHeatmap, markovTop, strategyBacktests, latest, n)
 
-  return {
-    picks: sortedHeatmap.slice(0, 12),
-    heatmap,
-    markovSource: latest,
-    markovTop,
-    monteCarloRuns: monteCarlo.runs,
-    strategyBacktests,
-    aiInsights,
-  }
+  return { picks: sortedHeatmap.slice(0, 12), heatmap, markovSource: latest, markovTop, monteCarloRuns: mcRuns, strategyBacktests, aiInsights }
 }
 
 function buildMarkov(rowsDesc: ParsedResult[]) {
   const transitions: Record<string, Record<string, number>> = {}
-  const chronological = [...rowsDesc].reverse()
-
-  for (let i = 1; i < chronological.length; i++) {
-    const prev = chronological[i - 1].bot2
-    const next = chronological[i].bot2
+  const asc = [...rowsDesc].reverse()
+  for (let i = 1; i < asc.length; i++) {
+    const prev = asc[i - 1].bot2; const next = asc[i].bot2
     if (!/^\d{2}$/.test(prev) || !/^\d{2}$/.test(next)) continue
     transitions[prev] ||= {}
     transitions[prev][next] = (transitions[prev][next] || 0) + 1
   }
-
   return { transitions }
 }
 
 function runMonteCarlo(rowsDesc: ParsedResult[], markovMap: Record<string, number>, markovTotal: number, runs: number) {
   const weights = ALL_2D.map(num => {
     const base = analyze2D(rowsDesc, num)
-    const markovBoost = markovTotal > 0 ? ((markovMap[num] || 0) / markovTotal) * 18 : 0
-    const recentPenalty = base.recentHit ? -1.4 : 0
-    return Math.max(0.25, 1 + base.score + markovBoost + recentPenalty)
+    const boost = markovTotal > 0 ? ((markovMap[num] || 0) / markovTotal) * 18 : 0
+    return Math.max(0.25, 1 + base.score + boost + (base.recentHit ? -1.4 : 0))
   })
-
-  const totalWeight = weights.reduce((sum, value) => sum + value, 0)
+  const totalW = weights.reduce((s, v) => s + v, 0)
   const cumulative: number[] = []
-  weights.reduce((sum, value, index) => {
-    const next = sum + value
-    cumulative[index] = next
-    return next
-  }, 0)
+  weights.reduce((s, v, i) => { const n = s + v; cumulative[i] = n; return n }, 0)
 
   const counts: Record<string, number> = {}
-  let seed = rowsDesc.slice(0, 8).map(r => Number(r.bot2) || 0).reduce((sum, value) => sum + value * 17, 7919)
-
+  let seed = rowsDesc.slice(0, 8).map(r => Number(r.bot2) || 0).reduce((s, v) => s + v * 17, 7919)
   for (let i = 0; i < runs; i++) {
     seed = (seed * 1664525 + 1013904223) % 4294967296
-    const target = (seed / 4294967296) * totalWeight
-    const idx = cumulative.findIndex(value => value >= target)
+    const target = (seed / 4294967296) * totalW
+    const idx = cumulative.findIndex(v => v >= target)
     const num = ALL_2D[idx === -1 ? ALL_2D.length - 1 : idx]
     counts[num] = (counts[num] || 0) + 1
   }
-
   const probability: Record<string, number> = {}
-  for (const num of ALL_2D) {
-    probability[num] = (counts[num] || 0) / runs
-  }
-
+  for (const num of ALL_2D) probability[num] = (counts[num] || 0) / runs
   return { counts, probability, runs }
 }
 
-function getRiskLevel(base: NumberAnalysis, combinedScore: number): AdvancedPick['risk'] {
+function getRiskLevel(base: NumberAnalysis, combined: number): AdvancedPick['risk'] {
   if (base.recentHit || (base.frequency30 >= 4 && base.gap <= 2)) return 'high'
-  if (combinedScore >= 7 && base.gap >= 4) return 'low'
+  if (combined >= 7 && base.gap >= 4) return 'low'
   return 'medium'
 }
 
-function buildAdvancedReasons(base: NumberAnalysis, markovProbability: number, monteCarloProbability: number, combinedScore: number, risk: AdvancedPick['risk']) {
+function buildAdvancedReasons(base: NumberAnalysis, markovP: number, mcP: number, combined: number, risk: AdvancedPick['risk']) {
   const reasons = [...base.reasons]
-  if (markovProbability > 0) reasons.push(`Markov หลังเลขล่าสุดให้น้ำหนัก ${round1(markovProbability * 100)}%`)
-  if (monteCarloProbability > 0.015) reasons.push(`Monte Carlo จำลองแล้วติดกลุ่มบน ${round1(monteCarloProbability * 100)}%`)
-  if (combinedScore >= 7) reasons.push('คะแนนรวม Hybrid อยู่ในโซนสูง')
-  if (risk === 'high') reasons.push('ความเสี่ยงสูงเพราะอาจเป็นเลขที่ตลาดไล่หรือเพิ่งออก')
-  if (risk === 'low') reasons.push('ความเสี่ยงต่ำกว่าเพราะคะแนนสูงและไม่ได้เพิ่งออกมากเกินไป')
+  if (markovP > 0) reasons.push(`Markov ${round1(markovP * 100)}%`)
+  if (mcP > 0.015) reasons.push(`Monte Carlo ${round1(mcP * 100)}%`)
+  if (combined >= 7) reasons.push('คะแนน Hybrid สูง')
+  if (risk === 'high') reasons.push('ความเสี่ยงสูง — เพิ่งออกหรือถูกไล่')
+  if (risk === 'low') reasons.push('ความเสี่ยงต่ำ — คะแนนสูงและไม่เพิ่งออก')
   return reasons.slice(0, 5)
 }
 
+type PickFn = (h: ParsedResult[], picks: number) => string[]
+
 function getStrategyBacktests(rowsDesc: ParsedResult[]): StrategyBacktest[] {
-  const strategies = [
+  return [
     { key: 'hot', label: 'เลขร้อน', pick: pickHot },
     { key: 'cold', label: 'เลขอั้น', pick: pickCold },
     { key: 'hybrid', label: 'Hybrid Score', pick: pickHybrid },
-    { key: 'markov', label: 'Markov + Gap', pick: pickMarkovGap },
+    { key: 'markov', label: 'Markov+Gap', pick: pickMarkovGap },
     { key: 'monte', label: 'Monte Carlo', pick: pickMonteCarlo },
-  ]
-
-  return strategies.map(strategy => runStrategyBacktest(rowsDesc, strategy.label, strategy.pick))
+  ].map(s => runStrategyBacktest(rowsDesc, s.label, s.pick))
 }
 
-type PickStrategy = (historyDesc: ParsedResult[], picks: number) => string[]
-
-function runStrategyBacktest(rowsDesc: ParsedResult[], label: string, pickStrategy: PickStrategy): StrategyBacktest {
-  const validRows = rowsDesc.filter(r => /^\d{2}$/.test(r.bot2))
-  const picksPerRound = 3
-  let wins = 0
-  let spent = 0
-  let returned = 0
-
-  if (validRows.length < 12) {
-    return { strategy: label, label, rounds: validRows.length, wins: 0, hitRate: 0, spent: 0, returned: 0, profit: 0, roi: 0 }
+function runStrategyBacktest(rowsDesc: ParsedResult[], label: string, pickFn: PickFn): StrategyBacktest {
+  const valid = rowsDesc.filter(r => /^\d{2}$/.test(r.bot2))
+  const n = valid.length
+  if (n < 8) return { strategy: label, label, rounds: n, wins: 0, hitRate: 0, spent: 0, returned: 0, profit: 0, roi: 0 }
+  let wins = 0; let spent = 0; let returned = 0
+  for (let i = n - 2; i >= 0; i--) {
+    const history = valid.slice(i + 1)
+    const picks = pickFn(history, 3)
+    spent += 15
+    if (picks.includes(valid[i].bot2)) { wins++; returned += 90 }
   }
-
-  for (let i = validRows.length - 2; i >= 0; i--) {
-    const history = validRows.slice(i + 1)
-    const picks = pickStrategy(history, picksPerRound)
-    spent += picksPerRound * 5
-    if (picks.includes(validRows[i].bot2)) {
-      wins += 1
-      returned += 90
-    }
-  }
-
-  const rounds = validRows.length - 1
+  const rounds = n - 1
   const profit = returned - spent
-  return {
-    strategy: label,
-    label,
-    rounds,
-    wins,
-    hitRate: round1((wins / rounds) * 100),
-    spent,
-    returned,
-    profit,
-    roi: spent > 0 ? round1((profit / spent) * 100) : 0,
-  }
+  return { strategy: label, label, rounds, wins, hitRate: round1((wins / rounds) * 100), spent, returned, profit, roi: spent > 0 ? round1((profit / spent) * 100) : 0 }
 }
 
-function pickHot(historyDesc: ParsedResult[], picks: number) {
-  const counts: Record<string, number> = {}
-  for (const r of historyDesc.slice(0, 60)) counts[r.bot2] = (counts[r.bot2] || 0) + 1
-  return ALL_2D.sort((a, b) => (counts[b] || 0) - (counts[a] || 0) || a.localeCompare(b)).slice(0, picks)
+function pickHot(h: ParsedResult[], picks: number) {
+  const c: Record<string, number> = {}
+  for (const r of h.slice(0, 60)) c[r.bot2] = (c[r.bot2] || 0) + 1
+  return ALL_2D.sort((a, b) => (c[b] || 0) - (c[a] || 0) || a.localeCompare(b)).slice(0, picks)
 }
-
-function pickCold(historyDesc: ParsedResult[], picks: number) {
-  const list = historyDesc.map(r => r.bot2)
-  return ALL_2D
-    .map(num => ({ num, gap: list.indexOf(num) === -1 ? list.length + 99 : list.indexOf(num) }))
-    .sort((a, b) => b.gap - a.gap || a.num.localeCompare(b.num))
-    .slice(0, picks)
-    .map(item => item.num)
+function pickCold(h: ParsedResult[], picks: number) {
+  const list = h.map(r => r.bot2)
+  return ALL_2D.map(num => ({ num, gap: list.indexOf(num) === -1 ? list.length + 99 : list.indexOf(num) }))
+    .sort((a, b) => b.gap - a.gap || a.num.localeCompare(b.num)).slice(0, picks).map(x => x.num)
 }
-
-function pickHybrid(historyDesc: ParsedResult[], picks: number) {
-  return ALL_2D
-    .map(num => analyze2D(historyDesc, num))
-    .sort((a, b) => b.score - a.score || b.frequency30 - a.frequency30 || b.gap - a.gap || a.number.localeCompare(b.number))
-    .slice(0, picks)
-    .map(item => item.number)
+function pickHybrid(h: ParsedResult[], picks: number) {
+  return ALL_2D.map(num => analyze2D(h, num)).sort((a, b) => b.score - a.score || b.gap - a.gap || a.number.localeCompare(b.number)).slice(0, picks).map(x => x.number)
 }
-
-function pickMarkovGap(historyDesc: ParsedResult[], picks: number) {
-  const latest = historyDesc[0]?.bot2 || '--'
-  const markov = buildMarkov(historyDesc)
+function pickMarkovGap(h: ParsedResult[], picks: number) {
+  const latest = h[0]?.bot2 || '--'
+  const markov = buildMarkov(h)
   const map = markov.transitions[latest] || {}
-  const total = Object.values(map).reduce((sum, value) => sum + value, 0)
-  return ALL_2D
-    .map(num => {
-      const base = analyze2D(historyDesc, num)
-      const prob = total > 0 ? (map[num] || 0) / total : 0
-      return { num, score: base.score + prob * 12 + clamp(base.gap / 10, 0, 2) }
-    })
-    .sort((a, b) => b.score - a.score || a.num.localeCompare(b.num))
-    .slice(0, picks)
-    .map(item => item.num)
+  const total = Object.values(map).reduce((s, v) => s + v, 0)
+  return ALL_2D.map(num => { const base = analyze2D(h, num); const p = total > 0 ? (map[num] || 0) / total : 0; return { num, score: base.score + p * 12 + clamp(base.gap / 10, 0, 2) } })
+    .sort((a, b) => b.score - a.score || a.num.localeCompare(b.num)).slice(0, picks).map(x => x.num)
 }
-
-function pickMonteCarlo(historyDesc: ParsedResult[], picks: number) {
-  const latest = historyDesc[0]?.bot2 || '--'
-  const markov = buildMarkov(historyDesc)
+function pickMonteCarlo(h: ParsedResult[], picks: number) {
+  const latest = h[0]?.bot2 || '--'
+  const markov = buildMarkov(h)
   const map = markov.transitions[latest] || {}
-  const total = Object.values(map).reduce((sum, value) => sum + value, 0)
-  const monte = runMonteCarlo(historyDesc, map, total, 15000)
-  return ALL_2D
-    .sort((a, b) => (monte.probability[b] || 0) - (monte.probability[a] || 0) || a.localeCompare(b))
-    .slice(0, picks)
+  const total = Object.values(map).reduce((s, v) => s + v, 0)
+  const mc = runMonteCarlo(h, map, total, 8000)
+  return ALL_2D.sort((a, b) => (mc.probability[b] || 0) - (mc.probability[a] || 0) || a.localeCompare(b)).slice(0, picks)
 }
 
-function buildAiInsights(picks: AdvancedPick[], markovTop: { number: string; probability: number; count: number }[], backtests: StrategyBacktest[], latest: string, totalRows: number) {
-  const bestBacktest = [...backtests].sort((a, b) => b.roi - a.roi || b.hitRate - a.hitRate)[0]
-  const top = picks[0]
-  const second = picks[1]
+function buildAiInsights(picks: AdvancedPick[], markovTop: { number: string; probability: number }[], backtests: StrategyBacktest[], latest: string, n: number) {
+  const best = [...backtests].sort((a, b) => b.roi - a.roi)[0]
   const insights: string[] = []
-
-  if (top) {
-    insights.push(`เลข ${top.number} ขึ้นอันดับ 1 เพราะ Hybrid Score ${top.score}/10, ขาด ${top.gap} งวด และ Confidence ${top.confidence}%`)
-  }
-  if (second) {
-    insights.push(`เลขสำรองที่ควรจับตาคือ ${second.number} คะแนน ${second.score}/10 เหมาะใช้กระจายความเสี่ยงคู่กับเลขหลัก`)
-  }
-  if (markovTop[0]) {
-    insights.push(`Markov จากงวดล่าสุด ${latest} ให้น้ำหนักเลขถัดไปที่ ${markovTop[0].number} ประมาณ ${markovTop[0].probability}% จากข้อมูลเปลี่ยนผ่านในอดีต`)
-  }
-  if (bestBacktest) {
-    insights.push(`สูตรที่ย้อนหลังดูดีที่สุดตอนนี้คือ ${bestBacktest.label}: Hit rate ${bestBacktest.hitRate}% / ROI ${bestBacktest.roi}% จาก ${bestBacktest.rounds} งวด`)
-  }
-  insights.push(`ฐานข้อมูลประเภทนี้มี ${totalRows} งวด ยิ่งเพิ่มข้อมูลย้อนหลังหลายปี ระบบ Markov และ Backtest จะเสถียรกว่านี้`)
-  insights.push('คำเตือน: ระบบนี้ช่วยคัดเลขจากสถิติ ไม่ใช่การันตีผล ควรใช้เป็นตัวกรองและจำกัดเงินต่อรอบเสมอ')
-
+  if (picks[0]) insights.push(`เลข ${picks[0].number} — คะแนน ${picks[0].score}/10, ขาด ${picks[0].gap} งวด, Confidence ${picks[0].confidence}%`)
+  if (picks[1]) insights.push(`เลขสำรอง ${picks[1].number} — คะแนน ${picks[1].score}/10, ใช้กระจายความเสี่ยง`)
+  if (markovTop[0]) insights.push(`Markov จากงวดล่าสุด ${latest} → เลขถัดไปที่น่าจับตา: ${markovTop[0].number} (${markovTop[0].probability}%)`)
+  if (best) insights.push(`สูตรที่ดีสุดจาก Backtest: ${best.label} — Hit rate ${best.hitRate}% / ROI ${best.roi}%`)
+  if (n < 30) insights.push(`⚠️ ข้อมูลมีแค่ ${n} งวด ยิ่งมีมากยิ่งแม่น`)
+  insights.push('⚠️ ระบบนี้ใช้คัดกรองจากสถิติเท่านั้น ไม่ใช่การันตีผล')
   return insights
 }
+
+function getLevel(score: number): NumberAnalysis['level'] {
+  if (score >= 7.5) return 'เด่นมาก'
+  if (score >= 6) return 'น่าจับตา'
+  if (score >= 4) return 'พอมีทรง'
+  return 'ยังไม่เด่น'
+}
+function round1(n: number) { return Math.round(n * 10) / 10 }
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)) }
