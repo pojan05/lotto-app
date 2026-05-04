@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useState, useEffect, useMemo } from 'react'
-import { parseCSV, getStats, type ParsedResult } from '../lib/parseCSV'
+import { parseCSV, getStats, getLottoName, type ParsedResult } from '../lib/parseCSV'
 import styles from './index.module.css'
 
 type Tab = 'hot' | 'cold' | 'tod' | 'history'
@@ -76,7 +76,7 @@ export default function Home() {
           {/* Type Selector */}
           <div className={styles.typeSelector} onClick={() => setShowTypeMenu(true)}>
             <span className={styles.typeLabel}>หวย:</span>
-            <span className={styles.typeValue}>{selectedType || 'เลือกประเภท'}</span>
+            <span className={styles.typeValue}>{selectedType ? getLottoName(selectedType) : 'เลือกประเภท'}</span>
             <span className={styles.typeArrow}>▾</span>
           </div>
         </header>
@@ -94,7 +94,7 @@ export default function Home() {
                     className={`${styles.typeItem} ${t === selectedType ? styles.typeItemActive : ''}`}
                     onClick={() => { setSelectedType(t); setShowTypeMenu(false) }}
                   >
-                    <span>{t}</span>
+                    <span>{getLottoName(t)}</span>
                     {t === selectedType && <span className={styles.checkmark}>✓</span>}
                   </div>
                 ))}
