@@ -556,3 +556,345 @@
   padding: 30px;
   font-size: 14px;
 }
+
+/* Cute Lab UX upgrade */
+.root {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 107, 157, 0.18), transparent 32%),
+    radial-gradient(circle at 100% 20%, rgba(0, 217, 255, 0.12), transparent 30%),
+    var(--bg);
+}
+
+.main {
+  position: relative;
+  z-index: 1;
+}
+
+.bgOrbA,
+.bgOrbB {
+  position: fixed;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  filter: blur(38px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgOrbA {
+  left: -80px;
+  top: 110px;
+  background: #ff6b9d;
+}
+
+.bgOrbB {
+  right: -90px;
+  top: 360px;
+  background: #00d9ff;
+}
+
+.header {
+  background: rgba(13, 13, 31, 0.78);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+}
+
+.heroCard,
+.resultCard,
+.backtestCard {
+  margin: 16px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  animation: slideUp 0.38s ease;
+}
+
+.heroKicker {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 107, 157, 0.12);
+  color: #ffabc8;
+  border: 1px solid rgba(255, 107, 157, 0.25);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.heroTitle {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.heroText {
+  color: var(--text2);
+  font-size: 13px;
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+
+.analyzeBox {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.numberInput {
+  width: 100%;
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(8, 8, 20, 0.7);
+  color: var(--text);
+  padding: 0 14px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  outline: none;
+  box-shadow: inset 0 1px 8px rgba(0,0,0,0.28);
+}
+
+.numberInput:focus {
+  border-color: rgba(0,217,255,0.58);
+  box-shadow: 0 0 0 4px rgba(0,217,255,0.08), inset 0 1px 8px rgba(0,0,0,0.28);
+}
+
+.clearButton {
+  height: 48px;
+  border: 0;
+  border-radius: 16px;
+  padding: 0 14px;
+  color: #190d16;
+  background: linear-gradient(135deg, #ffabc8, #ffd36e);
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.resultTop,
+.backtestHero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.resultLabel,
+.backtestLabel {
+  color: var(--text2);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+
+.resultStatus {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.scoreBubble {
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 900;
+  color: #101020;
+  box-shadow: 0 12px 26px rgba(0,0,0,0.28);
+}
+
+.risk_low { background: linear-gradient(135deg, #70ffd5, #00d9ff); }
+.risk_medium { background: linear-gradient(135deg, #ffd36e, #f5a623); }
+.risk_high { background: linear-gradient(135deg, #ffabc8, #e94560); color: #fff; }
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.metricCard {
+  background: rgba(8, 8, 20, 0.48);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.metricLabel {
+  color: var(--text3);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.metricValue {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.reasonItem {
+  background: rgba(0,217,255,0.07);
+  color: var(--text2);
+  border: 1px solid rgba(0,217,255,0.12);
+  border-radius: 14px;
+  padding: 9px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.warningBox {
+  border-radius: 16px;
+  background: rgba(255, 211, 110, 0.10);
+  border: 1px solid rgba(255, 211, 110, 0.18);
+  color: #ffe4a3;
+  font-size: 12px;
+  line-height: 1.55;
+  padding: 10px 12px;
+}
+
+.miniPickRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.miniPick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 5px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.miniPick strong {
+  font-family: 'Orbitron', monospace;
+  color: #ffabc8;
+  letter-spacing: 2px;
+}
+
+.miniPick span {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.pickGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pickCard {
+  position: relative;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(30,42,74,0.95), rgba(22,33,62,0.88));
+  color: var(--text);
+  padding: 12px;
+  font-family: 'Sarabun', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+}
+
+.pickCard:active {
+  transform: scale(0.98);
+}
+
+.pickRank {
+  color: var(--text3);
+  font-size: 10px;
+}
+
+.pickNum {
+  font-family: 'Orbitron', monospace;
+  font-size: 28px;
+  color: #ffabc8;
+  font-weight: 900;
+  letter-spacing: 3px;
+  line-height: 1.2;
+}
+
+.pickScore {
+  display: inline-flex;
+  margin: 4px 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0,217,255,0.12);
+  color: var(--accent3);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.pickReason {
+  color: var(--text3);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.backtestProfit {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+}
+
+.backtestRoi {
+  min-width: 86px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 12px 8px;
+  background: rgba(0,217,255,0.12);
+  color: var(--accent3);
+  border: 1px solid rgba(0,217,255,0.2);
+  font-weight: 900;
+}
+
+.barFill {
+  background: linear-gradient(90deg, #ff6b9d, #ffd36e, #00d9ff);
+}
+
+.summaryCard,
+.latestCard,
+.coldCard,
+.todRow,
+.historyRow {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+@media (max-width: 380px) {
+  .summaryGrid,
+  .metricGrid,
+  .pickGrid {
+    grid-template-columns: 1fr;
+  }
+  .miniPickRow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .heroTitle {
+    font-size: 21px;
+  }
+}
