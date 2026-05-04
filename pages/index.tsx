@@ -12,9 +12,10 @@ import {
   type ParsedResult,
   type StrategyBacktest,
 } from '../lib/parseCSV'
+import { useMockBet, type BetType, type MockBet } from '../hooks/useMockBet'
 import styles from './index.module.css'
 
-type Tab = 'overview' | 'analyze' | 'heatmap' | 'backtest' | 'ai' | 'hot' | 'cold' | 'history'
+type Tab = 'overview' | 'analyze' | 'heatmap' | 'backtest' | 'ai' | 'hot' | 'cold' | 'history' | 'mybets'
 
 export default function Home() {
   const [rows, setRows] = useState<ParsedResult[]>([])
@@ -55,6 +56,7 @@ export default function Home() {
   const stats = useMemo(() => getStats(filtered), [filtered])
   const advanced = useMemo(() => getAdvancedAnalytics(filtered), [filtered])
   const backtest = useMemo(() => getQuickBacktest(filtered), [filtered])
+  const { bets, addBet, deleteBet, clearAll, stats: betStats, notification, mounted } = useMockBet(rows)
 
   useEffect(() => {
     if (!query && stats.candidates2[0]) {
@@ -190,6 +192,7 @@ export default function Home() {
             { id: 'hot' as Tab, label: 'เลขเด่น', icon: '🔥' },
             { id: 'cold' as Tab, label: 'เลขอั้น', icon: '❄️' },
             { id: 'history' as Tab, label: 'ประวัติ', icon: '🕘' },
+            { id: 'mybets' as Tab, label: 'ของฉัน', icon: '🎯' },
           ].map(item => (
             <button
               key={item.id}
@@ -446,6 +449,84 @@ export default function Home() {
           </div>
         )}
 
+
+        {notification && (
+          <div className={`${styles.notification} ${notification.isWin ? styles.notificationWin : styles.notificationLose}`}>
+            {notification.message}
+          </div>
+        )}
+
+        {tab === 'mybets' && (
+          <div className={styles.stack}>
+            <section className={styles.panel}>
+              <div className={styles.cardHead}>
+                <div>
+                  <div className={styles.sectionKicker}>📊 สถิติของฉัน</div>
+                  <h2 className={styles.sectionTitle}>บันทึกส่วนตัว เก็บในเครื่องคุณ</h2>
+                </div>
+              </div>
+              {mounted && (
+                <div className={styles.betStatsGrid}>
+                  <div className={styles.betStatCard}>
+                    <div className={styles.betStatValue}>{betStats.total}</div>
+                    <div className={styles.betStatLabel}>ทั้งหมด</div>
+                  </div>
+                  <div className={styles.betStatCard}>
+                    <div className={`${styles.betStatValue} ${styles.betStatWin}`}>{betStats.wins}</div>
+                    <div className={styles.betStatLabel}>ถูก 🎉</div>
+                  </div>
+                  <div className={styles.betStatCard}>
+                    <div className={`${styles.betStatValue} ${styles.betStatLose}`}>{betStats.losses}</div>
+                    <div className={styles.betStatLabel}>ไม่ถูก</div>
+                  </div>
+                  <div className={styles.betStatCard}>
+                    <div className={styles.betStatValue}>{betStats.winRate}%</div>
+                    <div className={styles.betStatLabel}>แม่นยำ</div>
+                  </div>
+                </div>
+              )}
+              {mounted && betStats.total > 0 && (
+                <div className={styles.betExtraStats}>
+                  <span>🏆 หวยที่แม่น: <strong>{betStats.bestLotto.name}</strong> ({betStats.bestLotto.rate}%)</span>
+                  <span>🔢 เลขโปรด: <strong>{betStats.topNumber}</strong></span>
+                </div>
+              )}
+            </section>
+
+            <MockBetForm
+              lottoTypes={lottoTypes}
+              getLottoName={getLottoName}
+              latestResult={filtered[0]}
+              onAdd={addBet}
+            />
+
+            {mounted && bets.length > 0 && (
+              <section className={styles.panel}>
+                <div className={styles.cardHead}>
+                  <div>
+                    <div className={styles.sectionKicker}>รายการทดลองซื้อ</div>
+                    <h2 className={styles.sectionTitle}>ผลของทุกรายการ</h2>
+                  </div>
+                  <button className={styles.clearBtn} onClick={() => { if (confirm('ลบข้อมูลทั้งหมดใช่ไหม?')) clearAll() }}>ล้างทั้งหมด</button>
+                </div>
+                <div className={styles.betList}>
+                  {[...bets].reverse().map(bet => (
+                    <BetCard key={bet.id} bet={bet} onDelete={deleteBet} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {mounted && bets.length === 0 && (
+              <div className={styles.emptyBets}>
+                <div className={styles.emptyBetsIcon}>🎯</div>
+                <div className={styles.emptyBetsTitle}>ยังไม่มีรายการ</div>
+                <p>กรอกเลขที่มั่นใจด้านบน แล้วกด "บันทึก" เพื่อเริ่มติดตามผล ข้อมูลจะเก็บในเครื่องนี้เท่านั้น</p>
+              </div>
+            )}
+          </div>
+        )}
+
         <footer className={styles.footer}>อัปเดตอัตโนมัติทุกวัน • ออกแบบใหม่ให้อ่านง่ายและใช้งานบนมือถือสะดวกขึ้น</footer>
       </main>
     </>
@@ -580,4 +661,149 @@ function formatDate(dateString: string) {
   const date = new Date(dateString)
   if (Number.isNaN(date.getTime())) return dateString
   return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })
+}
+
+// ─── MockBetForm ────────────────────────────────────────────────────────────
+function MockBetForm({
+  lottoTypes,
+  getLottoName,
+  latestResult,
+  onAdd,
+}: {
+  lottoTypes: string[]
+  getLottoName: (code: string) => string
+  latestResult: ParsedResult | undefined
+  onAdd: (bet: Omit<MockBet, 'id' | 'timestamp' | 'status'>) => void
+}) {
+  const [lottoCode, setLottoCode] = useState(lottoTypes[0] || '')
+  const [betType, setBetType] = useState<BetType>('2ตัวล่าง')
+  const [number, setNumber] = useState('')
+  const [targetDate, setTargetDate] = useState('')
+
+  // Get next expected date (simple: today or tomorrow)
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+
+  const betTypes: BetType[] = ['3ตัวบน', '2ตัวล่าง', 'โต๊ด3ตัว', 'วิ่งบน', 'วิ่งล่าง']
+  const maxLen = betType === '3ตัวบน' || betType === 'โต๊ด3ตัว' ? 3 : betType === 'วิ่งบน' || betType === 'วิ่งล่าง' ? 1 : 2
+
+  const handleSubmit = () => {
+    if (!number || number.length < maxLen) return
+    const date = targetDate || todayStr
+    onAdd({
+      lottoCode,
+      lottoName: getLottoName(lottoCode),
+      targetDate: date,
+      betType,
+      number,
+    })
+    setNumber('')
+  }
+
+  return (
+    <section className={styles.panel}>
+      <div className={styles.cardHead}>
+        <div>
+          <div className={styles.sectionKicker}>ทดลองซื้อ</div>
+          <h2 className={styles.sectionTitle}>บันทึกเลขที่มั่นใจงวดนี้</h2>
+        </div>
+      </div>
+
+      {latestResult && (
+        <div className={styles.refResult}>
+          <span className={styles.refLabel}>งวดล่าสุด {formatDate(latestResult.date)}:</span>
+          <span className={styles.refNumbers}>
+            <span className={styles.refGold}>{latestResult.top3 || '---'}</span>
+            <span className={styles.refPink}>{latestResult.bot2 || '--'}</span>
+          </span>
+        </div>
+      )}
+
+      <div className={styles.betFormGrid}>
+        <div className={styles.betFormGroup}>
+          <label className={styles.betLabel}>เลือกหวย</label>
+          <select
+            className={styles.betSelect}
+            value={lottoCode}
+            onChange={e => setLottoCode(e.target.value)}
+          >
+            {lottoTypes.map(t => (
+              <option key={t} value={t}>{getLottoName(t)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.betFormGroup}>
+          <label className={styles.betLabel}>ประเภทการแทง</label>
+          <div className={styles.betTypeRow}>
+            {betTypes.map(bt => (
+              <button
+                key={bt}
+                className={`${styles.betTypeChip} ${betType === bt ? styles.betTypeChipActive : ''}`}
+                onClick={() => { setBetType(bt); setNumber('') }}
+              >
+                {bt}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.betFormGroup}>
+          <label className={styles.betLabel}>เลขที่มั่นใจ ({maxLen} ตัว)</label>
+          <input
+            className={styles.betNumberInput}
+            value={number}
+            maxLength={maxLen}
+            inputMode="numeric"
+            onChange={e => setNumber(e.target.value.replace(/\D/g, '').slice(0, maxLen))}
+            placeholder={'0'.repeat(maxLen)}
+          />
+        </div>
+
+        <div className={styles.betFormGroup}>
+          <label className={styles.betLabel}>งวดที่คาดหวัง</label>
+          <input
+            type="date"
+            className={styles.betDateInput}
+            value={targetDate || todayStr}
+            onChange={e => setTargetDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <button
+        className={styles.betSubmitBtn}
+        onClick={handleSubmit}
+        disabled={number.length < maxLen}
+      >
+        🎯 บันทึกการทดลองซื้อ
+      </button>
+    </section>
+  )
+}
+
+// ─── BetCard ────────────────────────────────────────────────────────────────
+function BetCard({ bet, onDelete }: { bet: MockBet; onDelete: (id: string) => void }) {
+  const statusIcon = bet.status === 'win' ? '🎉' : bet.status === 'lose' ? '😔' : '⏳'
+  const statusLabel = bet.status === 'win' ? 'ถูกรางวัล!' : bet.status === 'lose' ? 'ไม่ถูก' : 'รอผล'
+
+  return (
+    <div className={`${styles.betCard} ${styles[`betCard_${bet.status}`]}`}>
+      <div className={styles.betCardTop}>
+        <div className={styles.betCardLotto}>{bet.lottoName}</div>
+        <div className={`${styles.betCardStatus} ${styles[`betStatus_${bet.status}`]}`}>
+          {statusIcon} {statusLabel}
+        </div>
+      </div>
+      <div className={styles.betCardBody}>
+        <div className={styles.betCardNumber}>{bet.number}</div>
+        <div className={styles.betCardMeta}>
+          <span>{bet.betType}</span>
+          <span>งวด {formatDate(bet.targetDate)}</span>
+          {bet.actualResult && <span>ออก: {bet.actualResult}</span>}
+        </div>
+      </div>
+      <button className={styles.betDeleteBtn} onClick={() => onDelete(bet.id)}>✕</button>
+    </div>
+  )
 }
